@@ -1,3 +1,19 @@
+## [v0.3.0-rc.0] - 2026-09-15
+
+This maintenance candidate preserves the NProgress 0.2.0 API while modernizing
+distribution and browser behavior.
+
+ * Add TypeScript declarations and package exports for CommonJS and ESM consumers.
+ * Add SSR-safe imports, missing-parent fallback, cancellable timers, and explicit cancellation.
+ * Add accessible progressbar semantics, reduced-motion support, theming, RTL,
+   indeterminate mode, delayed display, pause/resume, and configurable maximum.
+ * Add dependency-free lifecycle events through `on()` and `off()`.
+ * Add explicit failure state and cancellation APIs for aborted operations.
+ * Replace the obsolete test setup with current Node, jsdom, TypeScript, and
+   Playwright verification across Chromium, Firefox, and WebKit.
+ * Remove obsolete Bower and Component manifests, modernize legacy integration
+   examples, and fix delayed-start cleanup after `remove()`.
+
 ## [v0.2.0] - May 13, 2015
 
 This is a maintenance release with cleanups. No functionality changes were introduced.
@@ -28,7 +44,7 @@ Minor changes:
  * [#65] - Bower: don't download package.json. Fixes browserify + jquery problem. ([@amelon])
  * [#75] - Fix compatibility with Karma. ([@shaqq])
  
-Internal changes:
+Maintenance changes:
 
  * [#77] - Use SVG to display Travis-CI badge. ([@Mithgol])
  * [#34] - Readme: update .inc() and .status docs ([@lacivert])

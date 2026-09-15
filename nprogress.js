@@ -1,4 +1,4 @@
-/* NProgress, (c) 2013, 2014 Rico Sta. Cruz - http://ricostacruz.com/nprogress
+/* NProgress, (c) 2013, 2014 Rico Sta. Cruz - https://ricostacruz.com/nprogress
  * @license MIT */
 
 ;(function(root, factory) {
@@ -11,10 +11,13 @@
     root.NProgress = factory();
   }
 
-})(this, function() {
+})(typeof globalThis !== 'undefined' ? globalThis : this, function() {
   var NProgress = {};
+  var currentParent = null;
+  var delayedStartPending = false;
+  var eventHandlers = {};
 
-  NProgress.version = '0.2.0';
+  NProgress.version = '0.3.0-rc.0';
 
   var Settings = NProgress.settings = {
     minimum: 0.08,
@@ -23,11 +26,22 @@
     speed: 200,
     trickle: true,
     trickleSpeed: 200,
+    maximum: 0.994,
+    showBar: true,
     showSpinner: true,
-    barSelector: '[role="bar"]',
-    spinnerSelector: '[role="spinner"]',
+    delay: 0,
+    barSelector: '[data-nprogress="bar"], [role="bar"]',
+    spinnerSelector: '[data-nprogress="spinner"], [role="spinner"]',
+    barColor: null,
+    spinnerColor: null,
+    failureColor: null,
+    indeterminate: false,
+    rtl: false,
+    ariaLabel: 'Loading',
+    height: '2px',
+    zIndex: 1031,
     parent: 'body',
-    template: '<div class="bar" role="bar"><div class="peg"></div></div><div class="spinner" role="spinner"><div class="spinner-icon"></div></div>'
+    template: '<div class="bar" data-nprogress="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="peg"></div></div><div class="spinner" data-nprogress="spinner" aria-hidden="true"><div class="spinner-icon"></div></div>'
   };
 
   /**
@@ -38,20 +52,73 @@
    *     });
    */
   NProgress.configure = function(options) {
-    var key, value;
+    var key, value,
+        wasRendered = typeof document !== 'undefined' && NProgress.isRendered(),
+        previous = {
+          showBar: Settings.showBar,
+          showSpinner: Settings.showSpinner,
+          parent: Settings.parent,
+          template: Settings.template
+        };
+
+    options = options || {};
     for (key in options) {
       value = options[key];
-      if (value !== undefined && options.hasOwnProperty(key)) Settings[key] = value;
+      if (value !== undefined && Object.prototype.hasOwnProperty.call(options, key)) Settings[key] = value;
+    }
+
+    if (wasRendered) {
+      var needsRerender = previous.showBar !== Settings.showBar ||
+        previous.showSpinner !== Settings.showSpinner ||
+        previous.parent !== Settings.parent ||
+        previous.template !== Settings.template;
+
+      if (needsRerender) {
+        var status = NProgress.status;
+        NProgress.remove();
+        if (status !== null) NProgress.render();
+      } else {
+        updatePresentation(document.getElementById('nprogress'));
+      }
     }
 
     return this;
   };
 
-  /**
-   * Last number.
-   */
+  /** Current progress value, or null when idle. */
 
   NProgress.status = null;
+  NProgress.failed = false;
+
+  /**
+   * Subscribes to a lifecycle event.
+   */
+
+  NProgress.on = function(event, handler) {
+    if (typeof handler !== 'function') return this;
+    (eventHandlers[event] || (eventHandlers[event] = [])).push(handler);
+    return this;
+  };
+
+  /**
+   * Removes one handler, all handlers for an event, or all handlers.
+   */
+
+  NProgress.off = function(event, handler) {
+    if (!event) {
+      eventHandlers = {};
+      return this;
+    }
+    if (!handler) {
+      delete eventHandlers[event];
+      return this;
+    }
+    var handlers = eventHandlers[event];
+    if (handlers) {
+      eventHandlers[event] = handlers.filter(function(item) { return item !== handler; });
+    }
+    return this;
+  };
 
   /**
    * Sets the progress bar status, where `n` is a number from `0.0` to `1.0`.
@@ -63,43 +130,57 @@
   NProgress.set = function(n) {
     var started = NProgress.isStarted();
 
+    if (delayedStartPending) {
+      cancelTimers();
+      delayedStartPending = false;
+    }
+
     n = clamp(n, Settings.minimum, 1);
     NProgress.status = (n === 1 ? null : n);
+    emit('progress', { progress: n, status: NProgress.status });
 
     var progress = NProgress.render(!started),
         bar      = progress.querySelector(Settings.barSelector),
         speed    = Settings.speed,
         ease     = Settings.easing;
 
-    progress.offsetWidth; /* Repaint */
+    progress.offsetWidth; /* Force the transition to start from the new value. */
+
+    if (Settings.indeterminate && bar) {
+      progress.classList.add('nprogress-indeterminate');
+      bar.removeAttribute('aria-valuenow');
+    } else if (bar) {
+      progress.classList.remove('nprogress-indeterminate');
+      bar.setAttribute('aria-valuenow', Math.round(n * 100));
+    }
 
     queue(function(next) {
-      // Set positionUsing if it hasn't already been set
+      // Detect the best positioning strategy once the document is available.
       if (Settings.positionUsing === '') Settings.positionUsing = NProgress.getPositioningCSS();
 
-      // Add transition
-      css(bar, barPositionCSS(n, speed, ease));
+      // Apply the transition to the active bar.
+      if (bar) css(bar, barPositionCSS(n, speed, ease));
 
       if (n === 1) {
-        // Fade out
+        // Fade out before removing the completed indicator.
         css(progress, {
           transition: 'none',
           opacity: 1
         });
-        progress.offsetWidth; /* Repaint */
+        progress.offsetWidth; /* Force the initial opacity to be committed. */
 
-        setTimeout(function() {
+        schedule(function() {
           css(progress, {
             transition: 'all ' + speed + 'ms linear',
             opacity: 0
           });
-          setTimeout(function() {
+          schedule(function() {
             NProgress.remove();
             next();
           }, speed);
         }, speed);
       } else {
-        setTimeout(next, speed);
+        schedule(next, speed);
       }
     });
 
@@ -111,48 +192,67 @@
   };
 
   /**
-   * Shows the progress bar.
-   * This is the same as setting the status to 0%, except that it doesn't go backwards.
+   * Shows the progress bar without reducing an existing value.
    *
    *     NProgress.start();
    *
    */
   NProgress.start = function() {
-    if (!NProgress.status) NProgress.set(0);
+    if (!NProgress.status) {
+      emit('start', { progress: NProgress.status, status: NProgress.status });
+      if (Settings.delay > 0) {
+        // Keep the operation active while delaying its first render.
+        NProgress.status = Settings.minimum;
+        delayedStartPending = true;
+        schedule(function() {
+          delayedStartPending = false;
+          if (!NProgress.status || NProgress.isRendered()) return;
+          NProgress.status = null;
+          NProgress.set(0);
+        }, Settings.delay);
+      } else {
+        NProgress.set(0);
+      }
+    }
 
-    var work = function() {
-      setTimeout(function() {
-        if (!NProgress.status) return;
-        NProgress.trickle();
-        work();
-      }, Settings.trickleSpeed);
-    };
-
-    if (Settings.trickle) work();
+    if (Settings.trickle && !NProgress.paused) {
+      scheduleTrickleWork(Settings.delay > 0 ? Settings.delay : 0);
+    }
 
     return this;
   };
 
   /**
-   * Hides the progress bar.
-   * This is the *sort of* the same as setting the status to 100%, with the
-   * difference being `done()` makes some placebo effect of some realistic motion.
+   * Completes the current operation with a short finishing animation.
    *
    *     NProgress.done();
    *
-   * If `true` is passed, it will show the progress bar even if its hidden.
+   * If `true` is passed, it will render the progress bar when idle.
    *
    *     NProgress.done(true);
    */
 
   NProgress.done = function(force) {
+    if (delayedStartPending && !force) {
+      cancelTimers();
+      cancelTrickleTimers();
+      NProgress.status = null;
+      return this;
+    }
+    if (delayedStartPending) {
+      cancelTimers();
+      delayedStartPending = false;
+    }
     if (!force && !NProgress.status) return this;
 
-    return NProgress.inc(0.3 + 0.5 * Math.random()).set(1);
+    NProgress.failed = false;
+    var result = NProgress.inc(0.3 + 0.5 * Math.random()).set(1);
+    emit('done', { progress: 1, status: NProgress.status });
+    return result;
   };
 
   /**
-   * Increments by a random amount.
+   * Increments by a realistic amount.
    */
 
   NProgress.inc = function(amount) {
@@ -171,7 +271,7 @@
         else { amount = 0; }
       }
 
-      n = clamp(n + amount, 0, 0.994);
+      n = clamp(n + amount, 0, Settings.maximum);
       return NProgress.set(n);
     }
   };
@@ -180,19 +280,46 @@
     return NProgress.inc();
   };
 
+  NProgress.paused = false;
+
+  NProgress.pause = function() {
+    var wasPaused = NProgress.paused;
+    NProgress.paused = true;
+    cancelTrickleTimers();
+    if (!wasPaused) emit('pause', { progress: NProgress.status, status: NProgress.status });
+    return this;
+  };
+
+  NProgress.resume = function() {
+    var wasPaused = NProgress.paused;
+    NProgress.paused = false;
+    if (NProgress.isStarted() && Settings.trickle) {
+      scheduleTrickleWork(0);
+    }
+    if (wasPaused) emit('resume', { progress: NProgress.status, status: NProgress.status });
+    return this;
+  };
+
   /**
-   * Waits for all supplied jQuery promises and
-   * increases the progress as the promises resolve.
+   * Tracks a promise, thenable, or jQuery Deferred while it settles.
    *
-   * @param $promise jQUery Promise
+   * @param promise Promise, thenable, or Deferred-like value
    */
   (function() {
     var initial = 0, current = 0;
 
-    NProgress.promise = function($promise) {
-      if (!$promise || $promise.state() === "resolved") {
+    NProgress.promise = function(promise) {
+      if (!promise) {
         return this;
       }
+
+      var settle = typeof promise.always === 'function'
+        ? function(callback) { promise.always(callback); }
+        : typeof promise.then === 'function'
+          ? function(callback) { promise.then(callback, callback); }
+          : null;
+
+      if (!settle) return this;
 
       if (current === 0) {
         NProgress.start();
@@ -201,7 +328,7 @@
       initial++;
       current++;
 
-      $promise.always(function() {
+      settle(function() {
         current--;
         if (current === 0) {
             initial = 0;
@@ -217,8 +344,7 @@
   })();
 
   /**
-   * (Internal) renders the progress bar markup based on the `template`
-   * setting.
+   * Renders the configured progress markup.
    */
 
   NProgress.render = function(fromStart) {
@@ -233,81 +359,123 @@
 
 
     var bar = progress.querySelector(Settings.barSelector),
-        perc = fromStart ? '-100' : toBarPerc(NProgress.status || 0),
+        perc = fromStart ? (Settings.rtl ? '100' : '-100') : toBarPerc(NProgress.status || 0),
         parent = isDOM(Settings.parent)
           ? Settings.parent
-          : document.querySelector(Settings.parent),
+          : document.querySelector(Settings.parent) || document.body,
         spinner
 
-    css(bar, {
-      transition: 'all 0 linear',
-      transform: 'translate3d(' + perc + '%,0,0)'
-    });
+    if (bar) {
+      css(bar, {
+        transition: 'all 0 linear',
+        transform: 'translate3d(' + perc + '%,0,0)'
+      });
+    }
 
     if (!Settings.showSpinner) {
       spinner = progress.querySelector(Settings.spinnerSelector);
       spinner && removeElement(spinner);
     }
+    if (!Settings.showBar) {
+      var visibleBar = progress.querySelector(Settings.barSelector);
+      visibleBar && removeElement(visibleBar);
+    }
+
+    updatePresentation(progress);
 
     if (parent != document.body) {
       addClass(parent, 'nprogress-custom-parent');
     }
 
     parent.appendChild(progress);
+    currentParent = parent;
     return progress;
   };
 
   /**
-   * Removes the element. Opposite of render().
+   * Removes the rendered indicator and cancels pending work.
    */
 
   NProgress.remove = function() {
+    if (typeof document === 'undefined') return this;
+    var wasRendered = NProgress.isRendered();
+    var wasDelayedStartPending = delayedStartPending;
+    cancelTimers();
+    cancelTrickleTimers();
+    queue.clear();
+    delayedStartPending = false;
+    if (wasDelayedStartPending) NProgress.status = null;
     removeClass(document.documentElement, 'nprogress-busy');
-    var parent = isDOM(Settings.parent)
+    var parent = currentParent || (isDOM(Settings.parent)
       ? Settings.parent
-      : document.querySelector(Settings.parent)
+      : document.querySelector(Settings.parent) || document.body)
     removeClass(parent, 'nprogress-custom-parent')
     var progress = document.getElementById('nprogress');
     progress && removeElement(progress);
+    currentParent = null;
+    NProgress.failed = false;
+    if (wasRendered) emit('remove', { progress: NProgress.status, status: NProgress.status });
+    return this;
   };
 
   /**
-   * Checks if the progress bar is rendered.
+   * Cancels the current progress operation without completing it.
+   */
+
+  NProgress.cancel = function() {
+    NProgress.remove();
+    NProgress.status = null;
+    emit('cancel', { progress: null, status: null });
+    return this;
+  };
+
+  /**
+   * Marks the current operation as failed and keeps the indicator visible.
+   */
+
+  NProgress.fail = function(force) {
+    if (!NProgress.status && !force) return this;
+    if (!NProgress.status && force) NProgress.start();
+    NProgress.failed = true;
+    var progress = NProgress.render();
+    updatePresentation(progress);
+    emit('fail', { progress: NProgress.status, status: NProgress.status });
+    return this;
+  };
+
+  /**
+   * Returns whether the indicator is currently rendered.
    */
 
   NProgress.isRendered = function() {
-    return !!document.getElementById('nprogress');
+    return typeof document !== 'undefined' && !!document.getElementById('nprogress');
   };
 
   /**
-   * Determine which positioning CSS rule to use.
+   * Determines which positioning CSS rule the document supports.
    */
 
   NProgress.getPositioningCSS = function() {
-    // Sniff on document.body.style
+    // Inspect the document's supported style properties.
     var bodyStyle = document.body.style;
 
-    // Sniff prefixes
+    // Check the vendor-prefixed variants used by older browsers.
     var vendorPrefix = ('WebkitTransform' in bodyStyle) ? 'Webkit' :
                        ('MozTransform' in bodyStyle) ? 'Moz' :
                        ('msTransform' in bodyStyle) ? 'ms' :
                        ('OTransform' in bodyStyle) ? 'O' : '';
 
     if (vendorPrefix + 'Perspective' in bodyStyle) {
-      // Modern browsers with 3D support, e.g. Webkit, IE10
+      // Browsers with 3D transform support.
       return 'translate3d';
     } else if (vendorPrefix + 'Transform' in bodyStyle) {
-      // Browsers without 3D support, e.g. IE9
+      // Browsers with 2D transform support.
       return 'translate';
     } else {
-      // Browsers without translate() support, e.g. IE7-8
+      // Fallback for browsers without transform support.
       return 'margin';
     }
   };
-
-  /**
-   * Helpers
-   */
 
   function isDOM (obj) {
     if (typeof HTMLElement === 'object') {
@@ -327,20 +495,87 @@
     return n;
   }
 
-  /**
-   * (Internal) converts a percentage (`0..1`) to a bar translateX
-   * percentage (`-100%..0%`).
-   */
+  /** Converts progress (`0..1`) to a bar translation percentage. */
 
   function toBarPerc(n) {
-    return (-1 + n) * 100;
+    return (Settings.rtl ? 1 - n : -1 + n) * 100;
+  }
+
+  function emit(event, payload) {
+    var handlers = eventHandlers[event];
+    if (!handlers) return;
+    handlers.slice().forEach(function(handler) {
+      handler.call(NProgress, payload);
+    });
+  }
+
+  function updatePresentation(progress) {
+    var bar = progress && progress.querySelector(Settings.barSelector);
+    if (!progress) return;
+
+    if (Settings.indeterminate && bar) {
+      progress.classList.add('nprogress-indeterminate');
+      bar.removeAttribute('aria-valuenow');
+    } else if (bar) {
+      progress.classList.remove('nprogress-indeterminate');
+      if (NProgress.isStarted()) {
+        bar.setAttribute('aria-valuenow', Math.round(NProgress.status * 100));
+      }
+    }
+
+    if (Settings.barColor) {
+      progress.style.setProperty('--nprogress-bar-color', Settings.barColor);
+    } else {
+      progress.style.removeProperty('--nprogress-bar-color');
+    }
+    if (Settings.spinnerColor) {
+      progress.style.setProperty('--nprogress-spinner-color', Settings.spinnerColor);
+    } else {
+      progress.style.removeProperty('--nprogress-spinner-color');
+    }
+    if (Settings.failureColor) {
+      progress.style.setProperty('--nprogress-failure-color', Settings.failureColor);
+    } else {
+      progress.style.removeProperty('--nprogress-failure-color');
+    }
+    if (Settings.height) {
+      progress.style.setProperty('--nprogress-height', Settings.height);
+    } else {
+      progress.style.removeProperty('--nprogress-height');
+    }
+    if (Settings.zIndex !== undefined && Settings.zIndex !== null) {
+      progress.style.setProperty('--nprogress-z-index', Settings.zIndex);
+    } else {
+      progress.style.removeProperty('--nprogress-z-index');
+    }
+    if (bar && Settings.ariaLabel) {
+      bar.setAttribute('aria-label', Settings.ariaLabel);
+    } else if (bar) {
+      bar.removeAttribute('aria-label');
+    }
+    if (Settings.rtl) {
+      addClass(progress, 'nprogress-rtl');
+    } else {
+      removeClass(progress, 'nprogress-rtl');
+    }
+    if (NProgress.failed) {
+      addClass(progress, 'nprogress-failed');
+    } else {
+      removeClass(progress, 'nprogress-failed');
+    }
+
+    if (!Settings.showSpinner) {
+      var spinner = progress.querySelector(Settings.spinnerSelector);
+      spinner && removeElement(spinner);
+    }
+    if (!Settings.showBar) {
+      var visibleBar = progress.querySelector(Settings.barSelector);
+      visibleBar && removeElement(visibleBar);
+    }
   }
 
 
-  /**
-   * (Internal) returns the correct CSS for changing the bar's
-   * position given an n percentage, and speed and ease from Settings
-   */
+  /** Builds the CSS transition for a progress value. */
 
   function barPositionCSS(n, speed, ease) {
     var barCSS;
@@ -358,9 +593,7 @@
     return barCSS;
   }
 
-  /**
-   * (Internal) Queues a function to be executed.
-   */
+  /** Serializes progress transitions. */
 
   var queue = (function() {
     var pending = [];
@@ -372,19 +605,63 @@
       }
     }
 
-    return function(fn) {
+    function enqueue(fn) {
       pending.push(fn);
       if (pending.length == 1) next();
+    }
+
+    enqueue.clear = function() {
+      pending.length = 0;
     };
+
+    return enqueue;
   })();
 
-  /**
-   * (Internal) Applies css properties to an element, similar to the jQuery
-   * css method.
-   *
-   * While this helper does assist with vendor prefixed property names, it
-   * does not perform any manipulation of values prior to setting styles.
-   */
+  /* Timers are grouped so removing the indicator cancels all pending work. */
+
+  var timers = [];
+  var trickleTimers = [];
+  var trickleLoopActive = false;
+
+  function schedule(fn, delay, timerGroup) {
+    timerGroup = timerGroup || timers;
+    var timer = setTimeout(function() {
+      var index = timerGroup.indexOf(timer);
+      if (index !== -1) timerGroup.splice(index, 1);
+      fn();
+    }, delay);
+    timerGroup.push(timer);
+    return timer;
+  }
+
+  function cancelTimers() {
+    while (timers.length) clearTimeout(timers.pop());
+  }
+
+  function scheduleTrickle(fn, delay) {
+    return schedule(fn, delay, trickleTimers);
+  }
+
+  function cancelTrickleTimers() {
+    while (trickleTimers.length) clearTimeout(trickleTimers.pop());
+    trickleLoopActive = false;
+  }
+
+  function scheduleTrickleWork(delay) {
+    if (trickleLoopActive) return;
+    trickleLoopActive = true;
+    scheduleTrickle(function() {
+      if (!NProgress.status || NProgress.paused) {
+        trickleLoopActive = false;
+        return;
+      }
+      NProgress.trickle();
+      trickleLoopActive = false;
+      scheduleTrickleWork(Settings.trickleSpeed);
+    }, delay);
+  }
+
+  /* Applies inline styles and resolves vendor-prefixed property names. */
 
   var css = (function() {
     var cssPrefixes = [ 'Webkit', 'O', 'Moz', 'ms' ],
@@ -429,7 +706,7 @@
       if (args.length == 2) {
         for (prop in properties) {
           value = properties[prop];
-          if (value !== undefined && properties.hasOwnProperty(prop)) applyCss(element, prop, value);
+          if (value !== undefined && Object.prototype.hasOwnProperty.call(properties, prop)) applyCss(element, prop, value);
         }
       } else {
         applyCss(element, args[1], args[2]);
@@ -437,18 +714,14 @@
     }
   })();
 
-  /**
-   * (Internal) Determines if an element or space separated list of class names contains a class name.
-   */
+  /** Tests whether an element contains a class name. */
 
   function hasClass(element, name) {
     var list = typeof element == 'string' ? element : classList(element);
     return list.indexOf(' ' + name + ' ') >= 0;
   }
 
-  /**
-   * (Internal) Adds a class to an element.
-   */
+  /** Adds a class without duplicating it. */
 
   function addClass(element, name) {
     var oldList = classList(element),
@@ -456,13 +729,11 @@
 
     if (hasClass(oldList, name)) return;
 
-    // Trim the opening space.
+    // Remove the leading separator added by classList().
     element.className = newList.substring(1);
   }
 
-  /**
-   * (Internal) Removes a class from an element.
-   */
+  /** Removes a class when present. */
 
   function removeClass(element, name) {
     var oldList = classList(element),
@@ -470,26 +741,20 @@
 
     if (!hasClass(element, name)) return;
 
-    // Replace the class name.
+    // Replace the matching class name.
     newList = oldList.replace(' ' + name + ' ', ' ');
 
-    // Trim the opening and closing spaces.
+    // Remove the separators added by classList().
     element.className = newList.substring(1, newList.length - 1);
   }
 
-  /**
-   * (Internal) Gets a space separated list of the class names on the element.
-   * The list is wrapped with a single space on each end to facilitate finding
-   * matches within the list.
-   */
+  /** Returns a padded class list for exact class-name matching. */
 
   function classList(element) {
     return (' ' + (element && element.className || '') + ' ').replace(/\s+/gi, ' ');
   }
 
-  /**
-   * (Internal) Removes an element from the DOM.
-   */
+  /** Removes an element when it has a parent. */
 
   function removeElement(element) {
     element && element.parentNode && element.parentNode.removeChild(element);

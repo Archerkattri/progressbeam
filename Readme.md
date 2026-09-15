@@ -1,225 +1,174 @@
-NProgress
-=========
+# NProgress
 
-[![Status](https://api.travis-ci.org/rstacruz/nprogress.svg?branch=master)](http://travis-ci.org/rstacruz/nprogress) 
-[![npm version](https://img.shields.io/npm/v/nprogress.png)](https://npmjs.org/package/nprogress "View this project on npm")
-[![jsDelivr Hits](https://data.jsdelivr.com/v1/package/npm/nprogress/badge?style=rounded)](https://www.jsdelivr.com/package/npm/nprogress)
+NProgress is a slim, dependency-free progress indicator for browser
+applications. Use it while a page loads, a route changes, or an asynchronous
+operation is in flight.
 
-> Minimalist progress bar
+## What it looks like
 
-Slim progress bars for Ajax'y applications. Inspired by Google, YouTube, and
-Medium.
+The images below are captured from the included browser fixture using the
+published `nprogress.js` and `nprogress.css` files. GitHub selects the dark
+variant when the reader uses dark mode.
 
-Installation
-------------
+### Determinate progress
 
-Add [nprogress.js] and [nprogress.css] to your project.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/output-determinate-dark.png">
+  <img src="docs/output-determinate.png" alt="Determinate NProgress bar with spinner" width="900">
+</picture>
 
-```html
-<script src='nprogress.js'></script>
-<link rel='stylesheet' href='nprogress.css'/>
+### Indeterminate progress
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/output-indeterminate-dark.png">
+  <img src="docs/output-indeterminate.png" alt="Indeterminate NProgress bar" width="900">
+</picture>
+
+### Failure state
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/output-failure-dark.png">
+  <img src="docs/output-failure.png" alt="NProgress bar in its failure state" width="900">
+</picture>
+
+## Install
+
+```sh
+npm install nprogress
 ```
 
-NProgress is available via [bower] and [npm].
+With a module bundler:
 
-    $ npm install --save nprogress
+```js
+import NProgress from 'nprogress';
+import 'nprogress/nprogress.css';
+```
 
-Also available via [unpkg] CDN:
+For direct browser use, load the published files:
 
-- https://unpkg.com/nprogress@0.2.0/nprogress.js
-- https://unpkg.com/nprogress@0.2.0/nprogress.css
+```html
+<link rel="stylesheet" href="nprogress.css">
+<script src="nprogress.js"></script>
+```
 
-[bower]: http://bower.io/search/?q=nprogress
-[npm]: https://www.npmjs.org/package/nprogress
-[unpkg]: https://unpkg.com/
+The package is safe to import during SSR. Call DOM methods only after a
+browser document is available.
 
-Basic usage
------------
+## Usage
 
-Simply call `start()` and `done()` to control the progress bar.
+Start and finish around an asynchronous operation:
 
-~~~ js
+```js
 NProgress.start();
-NProgress.done();
-~~~
 
-### Turbolinks (version 5+)
-Ensure you're using Turbolinks 5+, and use 
-this: (explained [here](https://github.com/rstacruz/nprogress/issues/8#issuecomment-239107109))
+fetch('/api/data')
+  .finally(() => NProgress.done());
+```
 
-~~~ js
-$(document).on('turbolinks:click', function() {
-  NProgress.start();
-});
-$(document).on('turbolinks:render', function() {
-  NProgress.done();
-  NProgress.remove();
-});
-~~~
+Set a known percentage or increment the current value:
 
-### Turbolinks (version 3 and below)
-Ensure you're using Turbolinks 1.3.0+, and use 
-this: (explained [here](https://github.com/rstacruz/nprogress/issues/8#issuecomment-23010560))
-
-~~~ js
-$(document).on('page:fetch',   function() { NProgress.start(); });
-$(document).on('page:change',  function() { NProgress.done(); });
-$(document).on('page:restore', function() { NProgress.remove(); });
-~~~
-
-### Pjax
-Try this: (explained [here](https://github.com/rstacruz/nprogress/issues/22#issuecomment-36540472))
-
-~~~ js
-$(document).on('pjax:start', function() { NProgress.start(); });
-$(document).on('pjax:end',   function() { NProgress.done();  });
-~~~
-
-Ideas
------
-
- * Add progress to your Ajax calls! Bind it to the jQuery `ajaxStart` and
- `ajaxStop` events.
-
- * Make a fancy loading bar even without Turbolinks/Pjax! Bind it to
- `$(document).ready` and `$(window).load`.
-
-Advanced usage
---------------
-
-__Percentages:__ To set a progress percentage, call `.set(n)`, where *n* is a
-number between `0..1`.
-
-~~~ js
-NProgress.set(0.0);     // Sorta same as .start()
+```js
 NProgress.set(0.4);
-NProgress.set(1.0);     // Sorta same as .done()
-~~~
-
-__Incrementing:__ To increment the progress bar, just use `.inc()`. This
-increments it with a random amount. This will never get to 100%: use it for
-every image load (or similar).
-
-~~~ js
 NProgress.inc();
-~~~
+NProgress.done();
+```
 
-If you want to increment by a specific value, you can pass that as a parameter:
+Track a promise, thenable, or jQuery Deferred:
 
-~~~ js
-NProgress.inc(0.2);    // This will get the current status value and adds 0.2 until status is 0.994
-~~~
+```js
+NProgress.promise(fetch('/api/data'));
+```
 
-__Force-done:__ By passing `true` to `done()`, it will show the progress bar
-even if it's not being shown. (The default behavior is that *.done()* will not
-    do anything if *.start()* isn't called)
+Use `cancel()` for an aborted operation and `fail()` when the indicator should
+remain visible as a failure:
 
-~~~ js
-NProgress.done(true);
-~~~
+```js
+NProgress.start().fail();
+NProgress.cancel();
+```
 
-__Get the status value:__ To get the status value, use `.status`
+## API
 
-Configuration
--------------
+| Method | Description |
+| --- | --- |
+| `start()` | Starts the indicator and automatic trickling. |
+| `done(force)` | Completes and removes it; `force` renders it when idle. |
+| `set(progress)` | Sets a value from `0` to `1`; `1` completes it. |
+| `inc(amount)` | Increases by a specified or realistic random amount. |
+| `promise(value)` | Tracks a promise, thenable, or jQuery Deferred. |
+| `cancel()` | Removes the indicator and resets its state. |
+| `fail(force)` | Keeps the indicator visible with failure styling. |
+| `pause()` / `resume()` | Pauses or resumes automatic trickling. |
+| `configure(options)` | Updates the indicator settings. |
+| `on(event, handler)` / `off(...)` | Manages lifecycle event handlers. |
 
-#### `minimum`
-Changes the minimum percentage used upon starting. (default: `0.08`)
+`render()`, `remove()`, `isStarted()`, `isRendered()`, and `status` are also
+available for integrations that need direct state or DOM control.
 
-~~~ js
-NProgress.configure({ minimum: 0.1 });
-~~~
+## Configuration
 
-#### `template`
-You can change the markup using `template`. To keep the progress
-bar working, keep an element with `role='bar'` in there. See the [default template]
-for reference.
-
-~~~ js
+```js
 NProgress.configure({
-  template: "<div class='....'>...</div>"
+  barColor: '#2563eb',
+  spinnerColor: '#0f172a',
+  failureColor: '#dc2626',
+  height: '3px',
+  zIndex: 2000,
+  delay: 120,
+  parent: '#app'
 });
-~~~
+```
 
-#### `easing` and `speed`
-Adjust animation settings using *easing* (a CSS easing string)
-and *speed* (in ms). (default: `ease` and `200`)
+| Option | Default | Description |
+| --- | --- | --- |
+| `minimum` | `0.08` | Initial progress value. |
+| `maximum` | `0.994` | Ceiling used by `inc()`. |
+| `easing` | `'linear'` | CSS transition easing. |
+| `speed` | `200` | Transition duration in milliseconds. |
+| `trickle` | `true` | Automatically increments while active. |
+| `trickleSpeed` | `200` | Delay between automatic increments. |
+| `delay` | `0` | Delay before the indicator is rendered. |
+| `showBar` | `true` | Shows the progress bar. |
+| `showSpinner` | `true` | Shows the spinner. |
+| `barColor` | `null` | Bar color CSS value. |
+| `spinnerColor` | `null` | Spinner color CSS value. |
+| `failureColor` | `null` | Failure-state bar color CSS value. |
+| `height` | `'2px'` | Bar height. |
+| `zIndex` | `1031` | Bar and spinner stacking order. |
+| `indeterminate` | `false` | Uses an animated indeterminate bar. |
+| `rtl` | `false` | Renders progress from right to left. |
+| `ariaLabel` | `'Loading'` | Accessible label for the progress bar. |
+| `parent` | `'body'` | CSS selector or DOM element receiving the indicator. |
 
-~~~ js
-NProgress.configure({ easing: 'ease', speed: 500 });
-~~~
+## Navigation events
 
-#### `trickle`
-Turn off the automatic incrementing behavior by setting this to `false`. (default: `true`)
+Connect NProgress to a navigation library with standard DOM listeners:
 
-~~~ js
-NProgress.configure({ trickle: false });
-~~~
+```js
+document.addEventListener('turbolinks:click', () => NProgress.start());
+document.addEventListener('turbolinks:render', () => NProgress.done());
 
-#### `trickleSpeed`
-Adjust how often to trickle/increment, in ms.
+document.addEventListener('pjax:start', () => NProgress.start());
+document.addEventListener('pjax:end', () => NProgress.done());
+```
 
-~~~ js
-NProgress.configure({ trickleSpeed: 200 });
-~~~
+## Accessibility and customization
 
-#### `showSpinner`
-Turn off loading spinner by setting it to false. (default: `true`)
+The default template uses `role="progressbar"`, `aria-valuemin`,
+`aria-valuemax`, and `aria-valuenow`. The spinner is hidden from assistive
+technology, and reduced-motion preferences disable its animation.
 
-~~~ js
-NProgress.configure({ showSpinner: false });
-~~~
+Custom templates must include an element matching `barSelector`. Templates are
+inserted as HTML; never pass untrusted input to `template`.
 
-#### `parent`
-specify this to change the parent container. (default: `body`)
+## Support and development
 
-~~~ js
-NProgress.configure({ parent: '#container' });
-~~~
+The maintained browser target is current Chromium, Firefox, and WebKit. Node.js
+18 or newer is supported for package imports and SSR.
 
-Customization
--------------
+See [MIGRATION.md](MIGRATION.md) for changes from NProgress 0.2.0 and
+[CONTRIBUTING.md](CONTRIBUTING.md) for development and verification commands.
 
-Just edit `nprogress.css` to your liking. Tip: you probably only want to find
-and replace occurrences of `#29d`.
+## License
 
-The included CSS file is pretty minimal... in fact, feel free to scrap it and
-make your own!
-
-Resources
----------
-
- * [New UI Pattern: Website Loading Bars](http://www.usabilitypost.com/2013/08/19/new-ui-pattern-website-loading-bars/) (usabilitypost.com)
-
-Support
--------
-
-__Bugs and requests__: submit them through the project's issues tracker.<br>
-[![Issues](http://img.shields.io/github/issues/rstacruz/nprogress.svg)]( https://github.com/rstacruz/nprogress/issues )
-
-__Questions__: ask them at StackOverflow with the tag *nprogress*.<br>
-[![StackOverflow](http://img.shields.io/badge/stackoverflow-nprogress-brightgreen.svg)]( http://stackoverflow.com/questions/tagged/nprogress )
-
-__Chat__: join us at gitter.im.<br>
-[![Chat](http://img.shields.io/badge/gitter-rstacruz/nprogress-brightgreen.svg)]( https://gitter.im/rstacruz/nprogress )
-
-[default template]: https://github.com/rstacruz/nprogress/blob/master/nprogress.js#L31
-[Turbolinks]: https://github.com/rails/turbolinks
-[nprogress.js]: http://ricostacruz.com/nprogress/nprogress.js
-[nprogress.css]: http://ricostacruz.com/nprogress/nprogress.css
-
-Thanks
-------
-
-**NProgress** © 2013-2017, Rico Sta. Cruz. Released under the [MIT License].<br>
-Authored and maintained by Rico Sta. Cruz with help from [contributors].
-
-> [ricostacruz.com](http://ricostacruz.com) &nbsp;&middot;&nbsp;
-> GitHub [@rstacruz](https://github.com/rstacruz) &nbsp;&middot;&nbsp;
-> Twitter [@rstacruz](https://twitter.com/rstacruz)
-
-[MIT License]: http://mit-license.org/
-[contributors]: http://github.com/rstacruz/nprogress/contributors
-
-[![](https://img.shields.io/github/followers/rstacruz.svg?style=social&label=@rstacruz)](https://github.com/rstacruz) &nbsp;
-[![](https://img.shields.io/twitter/follow/rstacruz.svg?style=social&label=@rstacruz)](https://twitter.com/rstacruz)
+NProgress is released under the [MIT License](License.md).

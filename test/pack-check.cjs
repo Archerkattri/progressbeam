@@ -1,0 +1,53 @@
+const assert = require('node:assert/strict');
+const childProcess = require('node:child_process');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+
+const root = path.resolve(__dirname, '..');
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'nprogress-pack-check-'));
+const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const env = Object.assign({}, process.env, {
+  npm_config_cache: path.join(tempRoot, 'npm-cache')
+});
+
+function runNpm(args) {
+  if (process.platform === 'win32') {
+    const quote = (value) => {
+      value = String(value);
+      return /[\s"&|<>^]/.test(value) ? '"' + value.replace(/"/g, '\\"') + '"' : value;
+    };
+    return childProcess.execFileSync(
+      process.env.ComSpec || 'cmd.exe',
+      ['/d', '/s', '/c', [npm].concat(args).map(quote).join(' ')],
+      { cwd: root, env, encoding: 'utf8' }
+    );
+  }
+  return childProcess.execFileSync(npm, args, { cwd: root, env, encoding: 'utf8' });
+}
+
+try {
+  const result = JSON.parse(runNpm(['pack', '--dry-run', '--json']))[0];
+  const actual = result.files.map((file) => file.path).sort();
+  const expected = [
+    'History.md',
+    'License.md',
+    'MIGRATION.md',
+    'Readme.md',
+    'nprogress.css',
+    'nprogress.d.ts',
+    'nprogress.js',
+    'nprogress.mjs',
+    'docs/output-determinate.png',
+    'docs/output-determinate-dark.png',
+    'docs/output-indeterminate.png',
+    'docs/output-indeterminate-dark.png',
+    'docs/output-failure.png',
+    'docs/output-failure-dark.png',
+    'package.json'
+  ].sort();
+  assert.deepEqual(actual, expected);
+  console.log('Package contents: ok');
+} finally {
+  fs.rmSync(tempRoot, { recursive: true, force: true });
+}

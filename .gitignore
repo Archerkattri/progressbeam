@@ -1,3 +1,6 @@
-node_modules
-build
-components
+node_modules/
+npm-debug.log*
+playwright-report/
+test-results/
+.npm-cache/
+*.tgz

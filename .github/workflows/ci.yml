@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [master, revival]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-smoke:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [18.x, 20.x, 22.x, 24.x]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Check runtime imports
+        run: npm run test:runtime
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22.x, 24.x]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm test
+
+      - name: Install browsers for browser tests
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Run browser tests
+        run: npm run test:browser
+
+      - name: Check TypeScript declarations
+        run: npm run typecheck
+
+      - name: Check package entry points
+        run: npm run test:package
+
+      - name: Check packed consumer
+        run: npm run test:packed
+
+      - name: Verify package contents
+        run: npm run pack:check
+
+      - name: Audit production dependencies
+        run: npm audit --audit-level=high
