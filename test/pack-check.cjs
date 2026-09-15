@@ -38,12 +38,8 @@ try {
     'nprogress.d.ts',
     'nprogress.js',
     'nprogress.mjs',
-    'docs/output-determinate.png',
-    'docs/output-determinate-dark.png',
-    'docs/output-indeterminate.png',
-    'docs/output-indeterminate-dark.png',
-    'docs/output-failure.png',
-    'docs/output-failure-dark.png',
+    'docs/output-demo.gif',
+    'docs/output-demo-dark.gif',
     'package.json'
   ].sort();
   assert.deepEqual(actual, expected);

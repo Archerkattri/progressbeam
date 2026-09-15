@@ -4,31 +4,15 @@ NProgress is a slim, dependency-free progress indicator for browser
 applications. Use it while a page loads, a route changes, or an asynchronous
 operation is in flight.
 
-## What it looks like
+## See it in motion
 
-The images below are captured from the included browser fixture using the
-published `nprogress.js` and `nprogress.css` files. GitHub selects the dark
-variant when the reader uses dark mode.
-
-### Determinate progress
+This is a real capture of the published runtime moving through a request,
+completion, and failure state. GitHub selects the dark variant when the reader
+uses dark mode.
 
 <picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/output-determinate-dark.png">
-  <img src="docs/output-determinate.png" alt="Determinate NProgress bar with spinner" width="900">
-</picture>
-
-### Indeterminate progress
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/output-indeterminate-dark.png">
-  <img src="docs/output-indeterminate.png" alt="Indeterminate NProgress bar" width="900">
-</picture>
-
-### Failure state
-
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="docs/output-failure-dark.png">
-  <img src="docs/output-failure.png" alt="NProgress bar in its failure state" width="900">
+  <source media="(prefers-color-scheme: dark)" srcset="docs/output-demo-dark.gif">
+  <img src="docs/output-demo.gif" alt="Animated NProgress demo showing loading, completion, and failure states" width="900">
 </picture>
 
 ## Install
