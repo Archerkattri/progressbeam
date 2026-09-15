@@ -1,7 +1,7 @@
 const assert = require('node:assert/strict');
-const NProgress = require('nprogress');
+const ProgressBeam = require('progressbeam');
 
-assert.equal(typeof NProgress.start, 'function');
-assert.equal(NProgress.version, '0.3.0-rc.0');
-assert.equal(NProgress.isRendered(), false);
+assert.equal(typeof ProgressBeam.start, 'function');
+assert.equal(ProgressBeam.version, '1.0.0');
+assert.equal(ProgressBeam.isRendered(), false);
 console.log('CommonJS and SSR package import: ok');

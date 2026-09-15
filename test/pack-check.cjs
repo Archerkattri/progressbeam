@@ -5,7 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'nprogress-pack-check-'));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'progressbeam-pack-check-'));
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const env = Object.assign({}, process.env, {
   npm_config_cache: path.join(tempRoot, 'npm-cache')
@@ -34,10 +34,10 @@ try {
     'License.md',
     'MIGRATION.md',
     'Readme.md',
-    'nprogress.css',
-    'nprogress.d.ts',
-    'nprogress.js',
-    'nprogress.mjs',
+    'progressbeam.css',
+    'progressbeam.d.ts',
+    'progressbeam.js',
+    'progressbeam.mjs',
     'docs/output-demo.gif',
     'docs/output-demo-dark.gif',
     'package.json'

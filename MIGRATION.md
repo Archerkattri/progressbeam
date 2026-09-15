@@ -1,7 +1,8 @@
-# Migrating from NProgress 0.2.0
+# Migrating from NProgress to ProgressBeam
 
-The 0.3 maintenance candidate keeps the existing core methods and default
-behavior while adding safer packaging and opt-in capabilities.
+ProgressBeam is an independent continuation of the NProgress browser utility.
+It keeps the familiar progress lifecycle while using a new package identity,
+browser global, DOM namespace, and stylesheet entry point.
 
 ## What stays compatible
 
@@ -13,17 +14,27 @@ and `status` remain available. The legacy `[role="bar"]` and
 
 ```js
 // CommonJS
-const NProgress = require('nprogress');
+const ProgressBeam = require('progressbeam');
 
 // ESM
-import NProgress from 'nprogress';
-import 'nprogress/nprogress.css';
+import ProgressBeam from 'progressbeam';
+import 'progressbeam/progressbeam.css';
 
 // Browser ESM resolves to the package's native .mjs entry.
 ```
 
 The package can be imported during SSR. Only call DOM methods after a browser
 document is available.
+
+## Namespace changes
+
+Update direct browser integrations and custom CSS selectors:
+
+- `NProgress` becomes `ProgressBeam`.
+- `#nprogress` becomes `#progressbeam`.
+- `nprogress-*` classes and CSS variables become `progressbeam-*`.
+- `nprogress.js`, `nprogress.mjs`, and `nprogress.css` become
+  `progressbeam.js`, `progressbeam.mjs`, and `progressbeam.css`.
 
 ## Markup and accessibility
 

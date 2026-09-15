@@ -1,12 +1,13 @@
 {
-  "name": "nprogress",
-  "author": "Rico Sta. Cruz <hi@ricostacruz.com>",
-  "description": "Simple slim progress bars",
-  "version": "0.3.0-rc.0",
+  "name": "progressbeam",
+  "author": "Archerkattri",
+  "description": "Slim, accessible progress bar for browser applications",
+  "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/rstacruz/nprogress.git"
+    "url": "https://github.com/Archerkattri/progressbeam.git"
   },
+  "homepage": "https://archerkattri.github.io/progressbeam/",
   "scripts": {
     "test": "mocha --timeout 10000 test/test.js",
     "test:browser": "playwright test",
@@ -16,29 +17,29 @@
     "typecheck": "tsc --project test/tsconfig.json",
     "pack:check": "node test/pack-check.cjs"
   },
-  "main": "nprogress.js",
-  "types": "nprogress.d.ts",
+  "main": "progressbeam.js",
+  "types": "progressbeam.d.ts",
   "sideEffects": [
     "*.css"
   ],
   "exports": {
     ".": {
-      "types": "./nprogress.d.ts",
+      "types": "./progressbeam.d.ts",
       "import": {
-        "node": "./nprogress.js",
-        "default": "./nprogress.mjs"
+        "node": "./progressbeam.js",
+        "default": "./progressbeam.mjs"
       },
-      "require": "./nprogress.js",
-      "default": "./nprogress.js"
+      "require": "./progressbeam.js",
+      "default": "./progressbeam.js"
     },
-    "./nprogress.css": "./nprogress.css",
+    "./progressbeam.css": "./progressbeam.css",
     "./package.json": "./package.json"
   },
   "files": [
-    "nprogress.js",
-    "nprogress.mjs",
-    "nprogress.css",
-    "nprogress.d.ts",
+    "progressbeam.js",
+    "progressbeam.mjs",
+    "progressbeam.css",
+    "progressbeam.d.ts",
     "docs/output-demo.gif",
     "docs/output-demo-dark.gif",
     "Readme.md",

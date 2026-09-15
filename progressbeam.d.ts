@@ -1,4 +1,4 @@
-export interface NProgressSettings {
+export interface ProgressBeamSettings {
   minimum: number;
   easing: string;
   positionUsing: string;
@@ -23,24 +23,24 @@ export interface NProgressSettings {
   template: string;
 }
 
-export type NProgressEventName = 'start' | 'progress' | 'done' | 'remove' | 'cancel' | 'pause' | 'resume' | 'fail';
+export type ProgressBeamEventName = 'start' | 'progress' | 'done' | 'remove' | 'cancel' | 'pause' | 'resume' | 'fail';
 
-export interface NProgressEvent {
+export interface ProgressBeamEvent {
   progress: number | null;
   status: number | null;
 }
 
-export type NProgressEventHandler = (event: NProgressEvent) => void;
+export type ProgressBeamEventHandler = (event: ProgressBeamEvent) => void;
 
-export interface NProgressApi {
+export interface ProgressBeamApi {
   readonly version: string;
-  settings: NProgressSettings;
+  settings: ProgressBeamSettings;
   status: number | null;
   failed: boolean;
   paused: boolean;
-  on(event: NProgressEventName, handler: NProgressEventHandler): this;
-  off(event?: NProgressEventName, handler?: NProgressEventHandler): this;
-  configure(options: Partial<NProgressSettings>): this;
+  on(event: ProgressBeamEventName, handler: ProgressBeamEventHandler): this;
+  off(event?: ProgressBeamEventName, handler?: ProgressBeamEventHandler): this;
+  configure(options: Partial<ProgressBeamSettings>): this;
   set(progress: number): this;
   isStarted(): boolean;
   start(): this;
@@ -58,6 +58,6 @@ export interface NProgressApi {
   getPositioningCSS(): string;
 }
 
-declare const NProgress: NProgressApi;
+declare const ProgressBeam: ProgressBeamApi;
 
-export = NProgress;
+export = ProgressBeam;

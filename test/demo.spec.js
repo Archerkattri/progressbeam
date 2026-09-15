@@ -12,16 +12,16 @@ test('vanilla demo loads without a framework runtime', async ({ page }) => {
 
   await page.goto(demoUrl);
   await expect(page.locator('body')).not.toHaveAttribute('hidden', '');
-  await expect(page.locator('.version').first()).toHaveText('0.3.0-rc.0');
-  await expect(page.locator('#nprogress')).toHaveCount(1);
-  await expect(page.locator('#nprogress')).toHaveCount(0);
+  await expect(page.locator('.version').first()).toHaveText('1.0.0');
+  await expect(page.locator('#progressbeam')).toHaveCount(1);
+  await expect(page.locator('#progressbeam')).toHaveCount(0);
 
   await page.evaluate(() => {
-    window.NProgress.cancel();
-    window.NProgress.configure({ speed: 0, trickle: false });
+    window.ProgressBeam.cancel();
+    window.ProgressBeam.configure({ speed: 0, trickle: false });
   });
   await page.locator('#b-40').click();
-  await expect(page.locator('#nprogress .bar')).toHaveAttribute('aria-valuenow', '40');
+  await expect(page.locator('#progressbeam .bar')).toHaveAttribute('aria-valuenow', '40');
   expect(externalRequests).toEqual([]);
 });
 
@@ -50,7 +50,7 @@ test('demonstrates a failed request state', async ({ page }) => {
   await page.goto(demoUrl);
   await page.locator('#b-fail').click();
 
-  await expect(page.locator('#nprogress')).toHaveClass(/nprogress-failed/);
+  await expect(page.locator('#progressbeam')).toHaveClass(/progressbeam-failed/);
   await expect(page.locator('#demo-status')).toHaveText('Failed');
   await expect(page.locator('#stage-message')).toHaveText('The request needs another try');
 });

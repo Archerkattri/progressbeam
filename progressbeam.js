@@ -1,4 +1,4 @@
-/* NProgress, (c) 2013, 2014 Rico Sta. Cruz - https://ricostacruz.com/nprogress
+/* ProgressBeam, derived from NProgress by Rico Sta. Cruz - https://ricostacruz.com/nprogress
  * @license MIT */
 
 ;(function(root, factory) {
@@ -8,18 +8,18 @@
   } else if (typeof exports === 'object') {
     module.exports = factory();
   } else {
-    root.NProgress = factory();
+    root.ProgressBeam = factory();
   }
 
 })(typeof globalThis !== 'undefined' ? globalThis : this, function() {
-  var NProgress = {};
+  var ProgressBeam = {};
   var currentParent = null;
   var delayedStartPending = false;
   var eventHandlers = {};
 
-  NProgress.version = '0.3.0-rc.0';
+  ProgressBeam.version = '1.0.0';
 
-  var Settings = NProgress.settings = {
+  var Settings = ProgressBeam.settings = {
     minimum: 0.08,
     easing: 'linear',
     positionUsing: '',
@@ -30,8 +30,8 @@
     showBar: true,
     showSpinner: true,
     delay: 0,
-    barSelector: '[data-nprogress="bar"], [role="bar"]',
-    spinnerSelector: '[data-nprogress="spinner"], [role="spinner"]',
+    barSelector: '[data-progressbeam="bar"], [role="bar"]',
+    spinnerSelector: '[data-progressbeam="spinner"], [role="spinner"]',
     barColor: null,
     spinnerColor: null,
     failureColor: null,
@@ -41,19 +41,19 @@
     height: '2px',
     zIndex: 1031,
     parent: 'body',
-    template: '<div class="bar" data-nprogress="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="peg"></div></div><div class="spinner" data-nprogress="spinner" aria-hidden="true"><div class="spinner-icon"></div></div>'
+    template: '<div class="bar" data-progressbeam="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="peg"></div></div><div class="spinner" data-progressbeam="spinner" aria-hidden="true"><div class="spinner-icon"></div></div>'
   };
 
   /**
    * Updates configuration.
    *
-   *     NProgress.configure({
+   *     ProgressBeam.configure({
    *       minimum: 0.1
    *     });
    */
-  NProgress.configure = function(options) {
+  ProgressBeam.configure = function(options) {
     var key, value,
-        wasRendered = typeof document !== 'undefined' && NProgress.isRendered(),
+        wasRendered = typeof document !== 'undefined' && ProgressBeam.isRendered(),
         previous = {
           showBar: Settings.showBar,
           showSpinner: Settings.showSpinner,
@@ -74,11 +74,11 @@
         previous.template !== Settings.template;
 
       if (needsRerender) {
-        var status = NProgress.status;
-        NProgress.remove();
-        if (status !== null) NProgress.render();
+        var status = ProgressBeam.status;
+        ProgressBeam.remove();
+        if (status !== null) ProgressBeam.render();
       } else {
-        updatePresentation(document.getElementById('nprogress'));
+        updatePresentation(document.getElementById('progressbeam'));
       }
     }
 
@@ -87,14 +87,14 @@
 
   /** Current progress value, or null when idle. */
 
-  NProgress.status = null;
-  NProgress.failed = false;
+  ProgressBeam.status = null;
+  ProgressBeam.failed = false;
 
   /**
    * Subscribes to a lifecycle event.
    */
 
-  NProgress.on = function(event, handler) {
+  ProgressBeam.on = function(event, handler) {
     if (typeof handler !== 'function') return this;
     (eventHandlers[event] || (eventHandlers[event] = [])).push(handler);
     return this;
@@ -104,7 +104,7 @@
    * Removes one handler, all handlers for an event, or all handlers.
    */
 
-  NProgress.off = function(event, handler) {
+  ProgressBeam.off = function(event, handler) {
     if (!event) {
       eventHandlers = {};
       return this;
@@ -123,12 +123,12 @@
   /**
    * Sets the progress bar status, where `n` is a number from `0.0` to `1.0`.
    *
-   *     NProgress.set(0.4);
-   *     NProgress.set(1.0);
+   *     ProgressBeam.set(0.4);
+   *     ProgressBeam.set(1.0);
    */
 
-  NProgress.set = function(n) {
-    var started = NProgress.isStarted();
+  ProgressBeam.set = function(n) {
+    var started = ProgressBeam.isStarted();
 
     if (delayedStartPending) {
       cancelTimers();
@@ -136,10 +136,10 @@
     }
 
     n = clamp(n, Settings.minimum, 1);
-    NProgress.status = (n === 1 ? null : n);
-    emit('progress', { progress: n, status: NProgress.status });
+    ProgressBeam.status = (n === 1 ? null : n);
+    emit('progress', { progress: n, status: ProgressBeam.status });
 
-    var progress = NProgress.render(!started),
+    var progress = ProgressBeam.render(!started),
         bar      = progress.querySelector(Settings.barSelector),
         speed    = Settings.speed,
         ease     = Settings.easing;
@@ -147,16 +147,16 @@
     progress.offsetWidth; /* Force the transition to start from the new value. */
 
     if (Settings.indeterminate && bar) {
-      progress.classList.add('nprogress-indeterminate');
+      progress.classList.add('progressbeam-indeterminate');
       bar.removeAttribute('aria-valuenow');
     } else if (bar) {
-      progress.classList.remove('nprogress-indeterminate');
+      progress.classList.remove('progressbeam-indeterminate');
       bar.setAttribute('aria-valuenow', Math.round(n * 100));
     }
 
     queue(function(next) {
       // Detect the best positioning strategy once the document is available.
-      if (Settings.positionUsing === '') Settings.positionUsing = NProgress.getPositioningCSS();
+      if (Settings.positionUsing === '') Settings.positionUsing = ProgressBeam.getPositioningCSS();
 
       // Apply the transition to the active bar.
       if (bar) css(bar, barPositionCSS(n, speed, ease));
@@ -175,7 +175,7 @@
             opacity: 0
           });
           schedule(function() {
-            NProgress.remove();
+            ProgressBeam.remove();
             next();
           }, speed);
         }, speed);
@@ -187,35 +187,35 @@
     return this;
   };
 
-  NProgress.isStarted = function() {
-    return typeof NProgress.status === 'number';
+  ProgressBeam.isStarted = function() {
+    return typeof ProgressBeam.status === 'number';
   };
 
   /**
    * Shows the progress bar without reducing an existing value.
    *
-   *     NProgress.start();
+   *     ProgressBeam.start();
    *
    */
-  NProgress.start = function() {
-    if (!NProgress.status) {
-      emit('start', { progress: NProgress.status, status: NProgress.status });
+  ProgressBeam.start = function() {
+    if (!ProgressBeam.status) {
+      emit('start', { progress: ProgressBeam.status, status: ProgressBeam.status });
       if (Settings.delay > 0) {
         // Keep the operation active while delaying its first render.
-        NProgress.status = Settings.minimum;
+        ProgressBeam.status = Settings.minimum;
         delayedStartPending = true;
         schedule(function() {
           delayedStartPending = false;
-          if (!NProgress.status || NProgress.isRendered()) return;
-          NProgress.status = null;
-          NProgress.set(0);
+          if (!ProgressBeam.status || ProgressBeam.isRendered()) return;
+          ProgressBeam.status = null;
+          ProgressBeam.set(0);
         }, Settings.delay);
       } else {
-        NProgress.set(0);
+        ProgressBeam.set(0);
       }
     }
 
-    if (Settings.trickle && !NProgress.paused) {
+    if (Settings.trickle && !ProgressBeam.paused) {
       scheduleTrickleWork(Settings.delay > 0 ? Settings.delay : 0);
     }
 
@@ -225,29 +225,29 @@
   /**
    * Completes the current operation with a short finishing animation.
    *
-   *     NProgress.done();
+   *     ProgressBeam.done();
    *
    * If `true` is passed, it will render the progress bar when idle.
    *
-   *     NProgress.done(true);
+   *     ProgressBeam.done(true);
    */
 
-  NProgress.done = function(force) {
+  ProgressBeam.done = function(force) {
     if (delayedStartPending && !force) {
       cancelTimers();
       cancelTrickleTimers();
-      NProgress.status = null;
+      ProgressBeam.status = null;
       return this;
     }
     if (delayedStartPending) {
       cancelTimers();
       delayedStartPending = false;
     }
-    if (!force && !NProgress.status) return this;
+    if (!force && !ProgressBeam.status) return this;
 
-    NProgress.failed = false;
-    var result = NProgress.inc(0.3 + 0.5 * Math.random()).set(1);
-    emit('done', { progress: 1, status: NProgress.status });
+    ProgressBeam.failed = false;
+    var result = ProgressBeam.inc(0.3 + 0.5 * Math.random()).set(1);
+    emit('done', { progress: 1, status: ProgressBeam.status });
     return result;
   };
 
@@ -255,11 +255,11 @@
    * Increments by a realistic amount.
    */
 
-  NProgress.inc = function(amount) {
-    var n = NProgress.status;
+  ProgressBeam.inc = function(amount) {
+    var n = ProgressBeam.status;
 
     if (!n) {
-      return NProgress.start();
+      return ProgressBeam.start();
     } else if(n > 1) {
       return;
     } else {
@@ -272,31 +272,31 @@
       }
 
       n = clamp(n + amount, 0, Settings.maximum);
-      return NProgress.set(n);
+      return ProgressBeam.set(n);
     }
   };
 
-  NProgress.trickle = function() {
-    return NProgress.inc();
+  ProgressBeam.trickle = function() {
+    return ProgressBeam.inc();
   };
 
-  NProgress.paused = false;
+  ProgressBeam.paused = false;
 
-  NProgress.pause = function() {
-    var wasPaused = NProgress.paused;
-    NProgress.paused = true;
+  ProgressBeam.pause = function() {
+    var wasPaused = ProgressBeam.paused;
+    ProgressBeam.paused = true;
     cancelTrickleTimers();
-    if (!wasPaused) emit('pause', { progress: NProgress.status, status: NProgress.status });
+    if (!wasPaused) emit('pause', { progress: ProgressBeam.status, status: ProgressBeam.status });
     return this;
   };
 
-  NProgress.resume = function() {
-    var wasPaused = NProgress.paused;
-    NProgress.paused = false;
-    if (NProgress.isStarted() && Settings.trickle) {
+  ProgressBeam.resume = function() {
+    var wasPaused = ProgressBeam.paused;
+    ProgressBeam.paused = false;
+    if (ProgressBeam.isStarted() && Settings.trickle) {
       scheduleTrickleWork(0);
     }
-    if (wasPaused) emit('resume', { progress: NProgress.status, status: NProgress.status });
+    if (wasPaused) emit('resume', { progress: ProgressBeam.status, status: ProgressBeam.status });
     return this;
   };
 
@@ -308,7 +308,7 @@
   (function() {
     var initial = 0, current = 0;
 
-    NProgress.promise = function(promise) {
+    ProgressBeam.promise = function(promise) {
       if (!promise) {
         return this;
       }
@@ -322,7 +322,7 @@
       if (!settle) return this;
 
       if (current === 0) {
-        NProgress.start();
+        ProgressBeam.start();
       }
 
       initial++;
@@ -332,9 +332,9 @@
         current--;
         if (current === 0) {
             initial = 0;
-            NProgress.done();
+            ProgressBeam.done();
         } else {
-            NProgress.set((initial - current) / initial);
+            ProgressBeam.set((initial - current) / initial);
         }
       });
 
@@ -347,19 +347,19 @@
    * Renders the configured progress markup.
    */
 
-  NProgress.render = function(fromStart) {
-    if (NProgress.isRendered()) return document.getElementById('nprogress');
+  ProgressBeam.render = function(fromStart) {
+    if (ProgressBeam.isRendered()) return document.getElementById('progressbeam');
 
-    addClass(document.documentElement, 'nprogress-busy');
+    addClass(document.documentElement, 'progressbeam-busy');
 
     var progress = document.createElement('div');
-    progress.id = 'nprogress';
+    progress.id = 'progressbeam';
     progress.innerHTML = Settings.template;
 
 
 
     var bar = progress.querySelector(Settings.barSelector),
-        perc = fromStart ? (Settings.rtl ? '100' : '-100') : toBarPerc(NProgress.status || 0),
+        perc = fromStart ? (Settings.rtl ? '100' : '-100') : toBarPerc(ProgressBeam.status || 0),
         parent = isDOM(Settings.parent)
           ? Settings.parent
           : document.querySelector(Settings.parent) || document.body,
@@ -384,7 +384,7 @@
     updatePresentation(progress);
 
     if (parent != document.body) {
-      addClass(parent, 'nprogress-custom-parent');
+      addClass(parent, 'progressbeam-custom-parent');
     }
 
     parent.appendChild(progress);
@@ -396,25 +396,25 @@
    * Removes the rendered indicator and cancels pending work.
    */
 
-  NProgress.remove = function() {
+  ProgressBeam.remove = function() {
     if (typeof document === 'undefined') return this;
-    var wasRendered = NProgress.isRendered();
+    var wasRendered = ProgressBeam.isRendered();
     var wasDelayedStartPending = delayedStartPending;
     cancelTimers();
     cancelTrickleTimers();
     queue.clear();
     delayedStartPending = false;
-    if (wasDelayedStartPending) NProgress.status = null;
-    removeClass(document.documentElement, 'nprogress-busy');
+    if (wasDelayedStartPending) ProgressBeam.status = null;
+    removeClass(document.documentElement, 'progressbeam-busy');
     var parent = currentParent || (isDOM(Settings.parent)
       ? Settings.parent
       : document.querySelector(Settings.parent) || document.body)
-    removeClass(parent, 'nprogress-custom-parent')
-    var progress = document.getElementById('nprogress');
+    removeClass(parent, 'progressbeam-custom-parent')
+    var progress = document.getElementById('progressbeam');
     progress && removeElement(progress);
     currentParent = null;
-    NProgress.failed = false;
-    if (wasRendered) emit('remove', { progress: NProgress.status, status: NProgress.status });
+    ProgressBeam.failed = false;
+    if (wasRendered) emit('remove', { progress: ProgressBeam.status, status: ProgressBeam.status });
     return this;
   };
 
@@ -422,9 +422,9 @@
    * Cancels the current progress operation without completing it.
    */
 
-  NProgress.cancel = function() {
-    NProgress.remove();
-    NProgress.status = null;
+  ProgressBeam.cancel = function() {
+    ProgressBeam.remove();
+    ProgressBeam.status = null;
     emit('cancel', { progress: null, status: null });
     return this;
   };
@@ -433,13 +433,13 @@
    * Marks the current operation as failed and keeps the indicator visible.
    */
 
-  NProgress.fail = function(force) {
-    if (!NProgress.status && !force) return this;
-    if (!NProgress.status && force) NProgress.start();
-    NProgress.failed = true;
-    var progress = NProgress.render();
+  ProgressBeam.fail = function(force) {
+    if (!ProgressBeam.status && !force) return this;
+    if (!ProgressBeam.status && force) ProgressBeam.start();
+    ProgressBeam.failed = true;
+    var progress = ProgressBeam.render();
     updatePresentation(progress);
-    emit('fail', { progress: NProgress.status, status: NProgress.status });
+    emit('fail', { progress: ProgressBeam.status, status: ProgressBeam.status });
     return this;
   };
 
@@ -447,15 +447,15 @@
    * Returns whether the indicator is currently rendered.
    */
 
-  NProgress.isRendered = function() {
-    return typeof document !== 'undefined' && !!document.getElementById('nprogress');
+  ProgressBeam.isRendered = function() {
+    return typeof document !== 'undefined' && !!document.getElementById('progressbeam');
   };
 
   /**
    * Determines which positioning CSS rule the document supports.
    */
 
-  NProgress.getPositioningCSS = function() {
+  ProgressBeam.getPositioningCSS = function() {
     // Inspect the document's supported style properties.
     var bodyStyle = document.body.style;
 
@@ -505,7 +505,7 @@
     var handlers = eventHandlers[event];
     if (!handlers) return;
     handlers.slice().forEach(function(handler) {
-      handler.call(NProgress, payload);
+      handler.call(ProgressBeam, payload);
     });
   }
 
@@ -514,39 +514,39 @@
     if (!progress) return;
 
     if (Settings.indeterminate && bar) {
-      progress.classList.add('nprogress-indeterminate');
+      progress.classList.add('progressbeam-indeterminate');
       bar.removeAttribute('aria-valuenow');
     } else if (bar) {
-      progress.classList.remove('nprogress-indeterminate');
-      if (NProgress.isStarted()) {
-        bar.setAttribute('aria-valuenow', Math.round(NProgress.status * 100));
+      progress.classList.remove('progressbeam-indeterminate');
+      if (ProgressBeam.isStarted()) {
+        bar.setAttribute('aria-valuenow', Math.round(ProgressBeam.status * 100));
       }
     }
 
     if (Settings.barColor) {
-      progress.style.setProperty('--nprogress-bar-color', Settings.barColor);
+      progress.style.setProperty('--progressbeam-bar-color', Settings.barColor);
     } else {
-      progress.style.removeProperty('--nprogress-bar-color');
+      progress.style.removeProperty('--progressbeam-bar-color');
     }
     if (Settings.spinnerColor) {
-      progress.style.setProperty('--nprogress-spinner-color', Settings.spinnerColor);
+      progress.style.setProperty('--progressbeam-spinner-color', Settings.spinnerColor);
     } else {
-      progress.style.removeProperty('--nprogress-spinner-color');
+      progress.style.removeProperty('--progressbeam-spinner-color');
     }
     if (Settings.failureColor) {
-      progress.style.setProperty('--nprogress-failure-color', Settings.failureColor);
+      progress.style.setProperty('--progressbeam-failure-color', Settings.failureColor);
     } else {
-      progress.style.removeProperty('--nprogress-failure-color');
+      progress.style.removeProperty('--progressbeam-failure-color');
     }
     if (Settings.height) {
-      progress.style.setProperty('--nprogress-height', Settings.height);
+      progress.style.setProperty('--progressbeam-height', Settings.height);
     } else {
-      progress.style.removeProperty('--nprogress-height');
+      progress.style.removeProperty('--progressbeam-height');
     }
     if (Settings.zIndex !== undefined && Settings.zIndex !== null) {
-      progress.style.setProperty('--nprogress-z-index', Settings.zIndex);
+      progress.style.setProperty('--progressbeam-z-index', Settings.zIndex);
     } else {
-      progress.style.removeProperty('--nprogress-z-index');
+      progress.style.removeProperty('--progressbeam-z-index');
     }
     if (bar && Settings.ariaLabel) {
       bar.setAttribute('aria-label', Settings.ariaLabel);
@@ -554,14 +554,14 @@
       bar.removeAttribute('aria-label');
     }
     if (Settings.rtl) {
-      addClass(progress, 'nprogress-rtl');
+      addClass(progress, 'progressbeam-rtl');
     } else {
-      removeClass(progress, 'nprogress-rtl');
+      removeClass(progress, 'progressbeam-rtl');
     }
-    if (NProgress.failed) {
-      addClass(progress, 'nprogress-failed');
+    if (ProgressBeam.failed) {
+      addClass(progress, 'progressbeam-failed');
     } else {
-      removeClass(progress, 'nprogress-failed');
+      removeClass(progress, 'progressbeam-failed');
     }
 
     if (!Settings.showSpinner) {
@@ -651,11 +651,11 @@
     if (trickleLoopActive) return;
     trickleLoopActive = true;
     scheduleTrickle(function() {
-      if (!NProgress.status || NProgress.paused) {
+      if (!ProgressBeam.status || ProgressBeam.paused) {
         trickleLoopActive = false;
         return;
       }
-      NProgress.trickle();
+      ProgressBeam.trickle();
       trickleLoopActive = false;
       scheduleTrickleWork(Settings.trickleSpeed);
     }, delay);
@@ -760,5 +760,5 @@
     element && element.parentNode && element.parentNode.removeChild(element);
   }
 
-  return NProgress;
+  return ProgressBeam;
 });

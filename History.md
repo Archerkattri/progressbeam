@@ -1,7 +1,10 @@
-## [v0.3.0-rc.0] - 2026-09-15
+## [v1.0.0] - 2026-09-15
 
-This maintenance candidate preserves the NProgress 0.2.0 API while modernizing
-distribution and browser behavior.
+ProgressBeam is the independent continuation of the NProgress browser utility,
+with a new package identity and modernized distribution and browser behavior.
+
+ * Rename the package, browser global, DOM identifiers, CSS variables, and entry files to ProgressBeam.
+ * Preserve the core progress API while adding a clean ESM/CJS package surface and TypeScript declarations.
 
  * Add TypeScript declarations and package exports for CommonJS and ESM consumers.
  * Add SSR-safe imports, missing-parent fallback, cancellable timers, and explicit cancellation.

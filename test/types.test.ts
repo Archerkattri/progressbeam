@@ -1,6 +1,6 @@
-import NProgress = require('nprogress');
+import ProgressBeam = require('progressbeam');
 
-NProgress.configure({
+ProgressBeam.configure({
   minimum: 0.1,
   maximum: 0.99,
   barColor: '#2563eb',
@@ -10,12 +10,12 @@ NProgress.configure({
   height: '3px',
   zIndex: 2000
 });
-NProgress.on('progress', (event) => { const current: number | null = event.progress; void current; });
-NProgress.off('progress');
+ProgressBeam.on('progress', (event) => { const current: number | null = event.progress; void current; });
+ProgressBeam.off('progress');
 
-NProgress.start().set(0.5).inc().pause().resume().done();
-NProgress.fail(true);
-NProgress.cancel();
-NProgress.promise(Promise.resolve('complete'));
-const rendered: HTMLElement = NProgress.render();
+ProgressBeam.start().set(0.5).inc().pause().resume().done();
+ProgressBeam.fail(true);
+ProgressBeam.cancel();
+ProgressBeam.promise(Promise.resolve('complete'));
+const rendered: HTMLElement = ProgressBeam.render();
 void rendered;

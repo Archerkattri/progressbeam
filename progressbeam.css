@@ -1,0 +1,102 @@
+/* Make clicks pass-through */
+#progressbeam {
+  pointer-events: none;
+}
+
+#progressbeam .bar {
+  background: var(--progressbeam-bar-background, var(--progressbeam-bar-color, #29d));
+
+  position: fixed;
+  z-index: var(--progressbeam-z-index, 1031);
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: var(--progressbeam-height, 2px);
+}
+
+#progressbeam.progressbeam-failed .bar {
+  background: var(--progressbeam-failure-color, #d33);
+}
+
+/* Fancy blur effect */
+#progressbeam .peg {
+  display: block;
+  position: absolute;
+  right: 0px;
+  width: 100px;
+  height: 100%;
+  box-shadow: 0 0 10px var(--progressbeam-bar-color, #29d), 0 0 5px var(--progressbeam-bar-color, #29d);
+  opacity: 1.0;
+
+  -webkit-transform: rotate(3deg) translate(0px, -4px);
+      -ms-transform: rotate(3deg) translate(0px, -4px);
+          transform: rotate(3deg) translate(0px, -4px);
+}
+
+/* Remove these to get rid of the spinner */
+#progressbeam .spinner {
+  display: block;
+  position: fixed;
+  z-index: var(--progressbeam-z-index, 1031);
+  top: 15px;
+  right: 15px;
+}
+
+#progressbeam .spinner-icon {
+  width: 18px;
+  height: 18px;
+  box-sizing: border-box;
+
+  border: solid 2px transparent;
+  border-top-color: var(--progressbeam-spinner-color, var(--progressbeam-bar-color, #29d));
+  border-left-color: var(--progressbeam-spinner-color, var(--progressbeam-bar-color, #29d));
+  border-radius: 50%;
+
+  -webkit-animation: progressbeam-spinner 400ms linear infinite;
+          animation: progressbeam-spinner 400ms linear infinite;
+}
+
+.progressbeam-custom-parent {
+  overflow: hidden;
+  position: relative;
+}
+
+.progressbeam-custom-parent #progressbeam .spinner,
+.progressbeam-custom-parent #progressbeam .bar {
+  position: absolute;
+}
+
+#progressbeam.progressbeam-rtl .bar {
+  left: auto;
+  right: 0;
+}
+
+#progressbeam.progressbeam-indeterminate .bar {
+  animation: progressbeam-indeterminate 1.5s infinite ease-in-out;
+  transform: translate3d(-100%, 0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #progressbeam .bar,
+  #progressbeam .spinner-icon {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+@keyframes progressbeam-indeterminate {
+  0% { transform: translate3d(-100%, 0, 0); }
+  50% { transform: translate3d(-10%, 0, 0); }
+  100% { transform: translate3d(100%, 0, 0); }
+}
+
+@-webkit-keyframes progressbeam-spinner {
+  0%   { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}
+@keyframes progressbeam-spinner {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

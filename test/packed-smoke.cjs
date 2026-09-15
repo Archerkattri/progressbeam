@@ -5,7 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 const root = path.resolve(__dirname, '..');
-const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'nprogress-packed-'));
+const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'progressbeam-packed-'));
 const cache = path.join(tempRoot, 'npm-cache');
 const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const env = Object.assign({}, process.env, { npm_config_cache: cache });
@@ -45,18 +45,18 @@ try {
 
   run(
     process.execPath,
-    ['-e', "const NProgress=require('nprogress'); if (typeof NProgress.start !== 'function' || NProgress.isRendered()) process.exit(1)"],
+    ['-e', "const ProgressBeam=require('progressbeam'); if (typeof ProgressBeam.start !== 'function' || ProgressBeam.isRendered()) process.exit(1)"],
     { cwd: consumer, env, stdio: 'inherit' }
   );
   run(
     process.execPath,
-    ['--input-type=module', '-e', "import NProgress from 'nprogress'; if (typeof NProgress.cancel !== 'function') process.exit(1)"],
+    ['--input-type=module', '-e', "import ProgressBeam from 'progressbeam'; if (typeof ProgressBeam.cancel !== 'function') process.exit(1)"],
     { cwd: consumer, env, stdio: 'inherit' }
   );
 
   const typecheckDir = path.join(consumer, 'types');
   fs.mkdirSync(typecheckDir);
-  fs.writeFileSync(path.join(typecheckDir, 'index.ts'), "import NProgress = require('nprogress'); NProgress.configure({ maximum: 0.9 }); NProgress.cancel();\n");
+  fs.writeFileSync(path.join(typecheckDir, 'index.ts'), "import ProgressBeam = require('progressbeam'); ProgressBeam.configure({ maximum: 0.9 }); ProgressBeam.cancel();\n");
   fs.writeFileSync(path.join(typecheckDir, 'tsconfig.json'), JSON.stringify({
     compilerOptions: {
       strict: true,
@@ -75,7 +75,7 @@ try {
     { cwd: root, env, stdio: 'inherit' }
   );
 
-  assert.equal(fs.existsSync(path.join(consumer, 'node_modules', 'nprogress', 'nprogress.css')), true);
+  assert.equal(fs.existsSync(path.join(consumer, 'node_modules', 'progressbeam', 'progressbeam.css')), true);
   console.log('Packed tarball consumer checks: ok');
 } finally {
   fs.rmSync(tempRoot, { recursive: true, force: true });

@@ -11,8 +11,8 @@
   --danger: #c53f51;
   --bar-color: #0c52d6;
   --bar-background: #0c52d6;
-  --nprogress-bar-color: var(--bar-color);
-  --nprogress-bar-background: var(--bar-background);
+  --progressbeam-bar-color: var(--bar-color);
+  --progressbeam-bar-background: var(--bar-background);
   --page-width: 1100px;
 }
 
@@ -29,8 +29,8 @@
   --danger: #f0808e;
   --bar-color: #78a9ff;
   --bar-background: #78a9ff;
-  --nprogress-bar-color: var(--bar-color);
-  --nprogress-bar-background: var(--bar-background);
+  --progressbeam-bar-color: var(--bar-color);
+  --progressbeam-bar-background: var(--bar-background);
 }
 
 * {

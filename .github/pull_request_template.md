@@ -4,7 +4,7 @@
 
 ## Compatibility
 
-- [ ] Existing NProgress methods remain compatible.
+- [ ] Existing ProgressBeam methods remain compatible.
 - [ ] Runtime dependencies remain at zero.
 - [ ] Documentation explains any new option or behavior.
 

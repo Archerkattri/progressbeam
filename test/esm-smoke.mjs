@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
-import NProgress from 'nprogress';
+import ProgressBeam from 'progressbeam';
 
-assert.equal(typeof NProgress.start, 'function');
-assert.equal(typeof NProgress.cancel, 'function');
+assert.equal(typeof ProgressBeam.start, 'function');
+assert.equal(typeof ProgressBeam.cancel, 'function');
 console.log('ESM package import: ok');

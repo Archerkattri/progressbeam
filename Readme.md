@@ -1,6 +1,6 @@
-# NProgress
+# ProgressBeam
 
-NProgress is a slim, dependency-free progress indicator for browser
+ProgressBeam is a slim, dependency-free progress indicator for browser
 applications. Use it while a page loads, a route changes, or an asynchronous
 operation is in flight.
 
@@ -12,27 +12,27 @@ uses dark mode.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/output-demo-dark.gif">
-  <img src="docs/output-demo.gif" alt="Animated NProgress demo showing loading, completion, and failure states" width="900">
+  <img src="docs/output-demo.gif" alt="Animated ProgressBeam demo showing loading, completion, and failure states" width="900">
 </picture>
 
 ## Install
 
 ```sh
-npm install nprogress
+npm install progressbeam
 ```
 
 With a module bundler:
 
 ```js
-import NProgress from 'nprogress';
-import 'nprogress/nprogress.css';
+import ProgressBeam from 'progressbeam';
+import 'progressbeam/progressbeam.css';
 ```
 
 For direct browser use, load the published files:
 
 ```html
-<link rel="stylesheet" href="nprogress.css">
-<script src="nprogress.js"></script>
+<link rel="stylesheet" href="progressbeam.css">
+<script src="progressbeam.js"></script>
 ```
 
 The package is safe to import during SSR. Call DOM methods only after a
@@ -43,32 +43,32 @@ browser document is available.
 Start and finish around an asynchronous operation:
 
 ```js
-NProgress.start();
+ProgressBeam.start();
 
 fetch('/api/data')
-  .finally(() => NProgress.done());
+  .finally(() => ProgressBeam.done());
 ```
 
 Set a known percentage or increment the current value:
 
 ```js
-NProgress.set(0.4);
-NProgress.inc();
-NProgress.done();
+ProgressBeam.set(0.4);
+ProgressBeam.inc();
+ProgressBeam.done();
 ```
 
 Track a promise, thenable, or jQuery Deferred:
 
 ```js
-NProgress.promise(fetch('/api/data'));
+ProgressBeam.promise(fetch('/api/data'));
 ```
 
 Use `cancel()` for an aborted operation and `fail()` when the indicator should
 remain visible as a failure:
 
 ```js
-NProgress.start().fail();
-NProgress.cancel();
+ProgressBeam.start().fail();
+ProgressBeam.cancel();
 ```
 
 ## API
@@ -92,7 +92,7 @@ available for integrations that need direct state or DOM control.
 ## Configuration
 
 ```js
-NProgress.configure({
+ProgressBeam.configure({
   barColor: '#2563eb',
   spinnerColor: '#0f172a',
   failureColor: '#dc2626',
@@ -126,14 +126,14 @@ NProgress.configure({
 
 ## Navigation events
 
-Connect NProgress to a navigation library with standard DOM listeners:
+Connect ProgressBeam to a navigation library with standard DOM listeners:
 
 ```js
-document.addEventListener('turbolinks:click', () => NProgress.start());
-document.addEventListener('turbolinks:render', () => NProgress.done());
+document.addEventListener('turbolinks:click', () => ProgressBeam.start());
+document.addEventListener('turbolinks:render', () => ProgressBeam.done());
 
-document.addEventListener('pjax:start', () => NProgress.start());
-document.addEventListener('pjax:end', () => NProgress.done());
+document.addEventListener('pjax:start', () => ProgressBeam.start());
+document.addEventListener('pjax:end', () => ProgressBeam.done());
 ```
 
 ## Accessibility and customization
@@ -150,9 +150,9 @@ inserted as HTML; never pass untrusted input to `template`.
 The maintained browser target is current Chromium, Firefox, and WebKit. Node.js
 18 or newer is supported for package imports and SSR.
 
-See [MIGRATION.md](MIGRATION.md) for changes from NProgress 0.2.0 and
+See [MIGRATION.md](MIGRATION.md) for changes from ProgressBeam 0.2.0 and
 [CONTRIBUTING.md](CONTRIBUTING.md) for development and verification commands.
 
 ## License
 
-NProgress is released under the [MIT License](License.md).
+ProgressBeam is released under the [MIT License](License.md).

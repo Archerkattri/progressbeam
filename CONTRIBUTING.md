@@ -1,6 +1,6 @@
-# Contributing to NProgress
+# Contributing to ProgressBeam
 
-Thanks for helping maintain NProgress. Keep the core package dependency-free at
+Thanks for helping maintain ProgressBeam. Keep the core package dependency-free at
 runtime and preserve the public API unless a compatibility change is explicitly
 reviewed.
 

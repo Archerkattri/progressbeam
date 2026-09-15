@@ -13,7 +13,7 @@ const esm = childProcess.spawnSync(
   [
     '--input-type=module',
     '-e',
-    "import NProgress from 'nprogress'; if (typeof NProgress.start !== 'function') process.exit(1);"
+    "import ProgressBeam from 'progressbeam'; if (typeof ProgressBeam.start !== 'function') process.exit(1);"
   ],
   { cwd: root, encoding: 'utf8' }
 );
