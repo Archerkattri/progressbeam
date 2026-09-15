@@ -1,78 +1,228 @@
 <!doctype html>
-<html lang='en'>
+<html lang="en">
 <head>
-  <meta charset='utf-8'>
-  <title>NProgress: slim progress bars in JavaScript</title>
-  <meta name='description' content='A small, accessible progress bar for browser applications'>
-  <link href='support/style.css' rel='stylesheet' />
-  <link href='nprogress.css' rel='stylesheet' />
-
-  <meta name="viewport" content="width=device-width">
-  <script src='nprogress.js'></script>
+  <meta charset="utf-8">
+  <meta name="color-scheme" content="light dark">
+  <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#111318" media="(prefers-color-scheme: dark)">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="NProgress is a slim, accessible progress bar for browser applications.">
+  <title>NProgress — slim progress bars in JavaScript</title>
+  <script>
+    (function() {
+      var savedTheme = null;
+      try {
+        savedTheme = localStorage.getItem('nprogress-theme');
+      } catch (error) {
+        savedTheme = null;
+      }
+      var systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = savedTheme === 'dark' || savedTheme === 'light' ? savedTheme : systemTheme;
+    }());
+  </script>
+  <link href="support/style.css" rel="stylesheet">
+  <link href="nprogress.css" rel="stylesheet">
+  <script src="nprogress.js"></script>
 </head>
 
 <body hidden>
-  <header class='page-header'>
-    <span class='nprogress-logo fade out'></span>
-    <h1>NProgress<i>.js</i></h1>
-    <p class='fade out brief big'>A nanoscopic progress bar. Featuring realistic
-    trickle animations to convince your users that something is happening!</p>
+  <header class="site-header">
+    <div class="page-width header-inner">
+      <a class="brand" href="#top" aria-label="NProgress home">
+        <span class="brand-mark" aria-hidden="true"><span></span></span>
+        <span>NProgress <span class="brand-version">.js</span></span>
+      </a>
+      <nav class="site-nav" aria-label="Primary navigation">
+        <a href="#demo">Demo</a>
+        <a href="#usage">Usage</a>
+        <a href="https://github.com/Archerkattri/nprogress">GitHub <span aria-hidden="true">↗</span></a>
+        <button class="theme-toggle" id="theme-toggle" type="button" aria-pressed="false" aria-label="Switch to dark mode">
+          <span aria-hidden="true" class="theme-symbol">☾</span>
+          <span id="theme-label">dark mode</span>
+        </button>
+      </nav>
+    </div>
   </header>
 
-  <div class='contents fade out'>
-    <div class='controls'>
-      <p>
-        <button class='button play' id='b-0' aria-label='Start progress'></button>
-        <i>NProgress</i><b>.start()</b>
-        &mdash;
-        shows the progress bar
-      </p>
-      <p>
-        <button class='button play' id='b-40' aria-label='Set progress to 40 percent'></button>
-        <i>NProgress</i><b>.set(0.4)</b>
-        &mdash;
-        sets a percentage
-      </p>
-      <p>
-        <button class='button play' id='b-inc' aria-label='Increment progress'></button>
-        <i>NProgress</i><b>.inc()</b>
-        &mdash;
-        increments by a little
-      </p>
-      <p>
-        <button class='button play' id='b-100' aria-label='Complete progress'></button>
-        <i>NProgress</i><b>.done()</b>
-        &mdash;
-        completes the progress
-      </p>
+  <main class="page-width" id="top">
+    <section class="intro" aria-labelledby="intro-title">
+      <div class="intro-label">A small browser utility</div>
+      <h1 id="intro-title">Show that work<br>has started.</h1>
+      <p class="intro-copy">NProgress adds a thin progress indicator to the top of a page. It is built for navigation, Ajax requests, and any other operation where the result takes a moment.</p>
+      <div class="intro-meta">
+        <code>npm install nprogress</code>
+        <span>v<span class="version"></span></span>
+        <span>MIT licensed</span>
+      </div>
+    </section>
+
+    <section class="content-section demo-section" id="demo" aria-labelledby="demo-title">
+      <div class="section-side">
+        <span class="section-number">01</span>
+        <h2 id="demo-title">Try it</h2>
+        <p>The bar is real. It appears at the top of the page when an operation starts and leaves when it finishes.</p>
+      </div>
+      <div class="demo-panel">
+        <div class="demo-panel-head">
+          <span>Live demo</span>
+          <span class="demo-status" id="demo-status">Ready</span>
+        </div>
+        <div class="demo-output">
+          <div class="output-label">Current state</div>
+          <div class="output-state" id="stage-message">Waiting for an action</div>
+          <div class="output-rail" aria-hidden="true"><span id="stage-meter-fill"></span></div>
+        </div>
+        <div class="demo-actions" aria-label="Progress controls">
+          <button id="b-0" type="button">Start <code>NProgress.start()</code></button>
+          <button id="b-40" type="button">Set 40% <code>NProgress.set(0.4)</code></button>
+          <button id="b-inc" type="button">Increment <code>NProgress.inc()</code></button>
+          <button id="b-100" type="button">Complete <code>NProgress.done()</code></button>
+          <button class="danger-action" id="b-fail" type="button">Fail <code>NProgress.fail()</code></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section usage-section" id="usage" aria-labelledby="usage-title">
+      <div class="section-side">
+        <span class="section-number">02</span>
+        <h2 id="usage-title">Use it</h2>
+        <p>No framework runtime is required. Import the module and the stylesheet, then connect the calls to your own request lifecycle.</p>
+      </div>
+      <div class="usage-content">
+        <div class="code-block">
+          <div class="code-head"><span>Install</span><span>shell</span></div>
+          <pre><code>npm install nprogress</code></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-head"><span>Basic lifecycle</span><span>app.js</span></div>
+          <pre><code><span class="code-keyword">import</span> NProgress <span class="code-keyword">from</span> <span class="code-string">'nprogress'</span>
+<span class="code-keyword">import</span> <span class="code-string">'nprogress/nprogress.css'</span>
+
+NProgress.start()
+<span class="code-comment">// load a route or request</span>
+NProgress.done()</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section api-section" aria-labelledby="api-title">
+      <div class="section-side">
+        <span class="section-number">03</span>
+        <h2 id="api-title">The API</h2>
+        <p>Small surface area, explicit states. Use <code>fail()</code> when the work did not finish normally.</p>
+      </div>
+      <div class="api-table" role="table" aria-label="NProgress API">
+        <div class="api-row api-head" role="row"><span role="columnheader">Call</span><span role="columnheader">What it does</span></div>
+        <div class="api-row" role="row"><code role="cell">start()</code><span role="cell">Starts the indicator and trickles forward.</span></div>
+        <div class="api-row" role="row"><code role="cell">set(0.4)</code><span role="cell">Sets a known progress value from 0 to 1.</span></div>
+        <div class="api-row" role="row"><code role="cell">inc()</code><span role="cell">Moves forward without reaching completion.</span></div>
+        <div class="api-row" role="row"><code role="cell">done()</code><span role="cell">Completes and removes the indicator.</span></div>
+        <div class="api-row" role="row"><code role="cell">fail()</code><span role="cell">Marks the current operation as failed.</span></div>
+      </div>
+    </section>
+
+    <section class="closing-section" aria-label="Project links">
+      <div>
+        <span class="closing-mark" aria-hidden="true">—</span>
+        <p>Progress feedback for the part of the interface that has not arrived yet.</p>
+      </div>
+      <div class="closing-links">
+        <a href="https://github.com/Archerkattri/nprogress">Source on GitHub <span aria-hidden="true">↗</span></a>
+        <a href="https://github.com/Archerkattri/nprogress/issues">Report an issue <span aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="page-width footer-inner">
+      <span>NProgress <span class="version"></span></span>
+      <span>Maintained as a small, dependency-free browser utility.</span>
     </div>
-    <div class='actions'>
-      <a href='https://github.com/rstacruz/nprogress' class='button primary big'>
-        Download
-        v<span class='version'></span>
-      </a>
-      <p class='brief'>Designed for single-page applications and Ajax-heavy apps.</p>
-    </div>
-    <div class='hr-rule'></div>
-    <div class='share-buttons'>
-      <a href='https://github.com/rstacruz/nprogress' class='button'>View source on GitHub</a>
-      <a href='https://github.com/rstacruz/nprogress/issues' class='button'>Report an issue</a>
-    </div>
-  </div>
+  </footer>
 
   <script>
-    document.body.hidden = false;
-    document.querySelector('.version').textContent = NProgress.version;
-    NProgress.start();
-    setTimeout(function() {
-      NProgress.done();
-      document.querySelectorAll('.fade').forEach(function(element) { element.classList.remove('out'); });
-    }, 1000);
+    (function() {
+      var themeToggle = document.getElementById('theme-toggle');
+      var themeLabel = document.getElementById('theme-label');
+      var themeSymbol = document.querySelector('.theme-symbol');
+      var status = document.getElementById('demo-status');
+      var stageMessage = document.getElementById('stage-message');
+      var stageMeter = document.getElementById('stage-meter-fill');
+      var themeMedia = window.matchMedia('(prefers-color-scheme: dark)');
+      var introTimer;
 
-    document.getElementById('b-0').addEventListener('click', function() { NProgress.start(); });
-    document.getElementById('b-40').addEventListener('click', function() { NProgress.set(0.4); });
-    document.getElementById('b-inc').addEventListener('click', function() { NProgress.inc(); });
-    document.getElementById('b-100').addEventListener('click', function() { NProgress.done(); });
+      function currentTheme() {
+        return document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+      }
+
+      function updateThemeButton() {
+        var theme = currentTheme();
+        var nextTheme = theme === 'dark' ? 'light' : 'dark';
+        themeToggle.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+        themeToggle.setAttribute('aria-label', 'Switch to ' + nextTheme + ' mode');
+        themeLabel.textContent = nextTheme + ' mode';
+        themeSymbol.textContent = nextTheme === 'dark' ? '☾' : '☀';
+      }
+
+      function setTheme(theme, persist) {
+        document.documentElement.dataset.theme = theme;
+        if (persist) {
+          try {
+            localStorage.setItem('nprogress-theme', theme);
+          } catch (error) {
+            /* A blocked storage context still gets the theme for this visit. */
+          }
+        }
+        updateThemeButton();
+      }
+
+      function setDemoState(label, message, progress, failed) {
+        status.classList.toggle('is-failed', failed);
+        status.textContent = label;
+        stageMessage.textContent = message;
+        stageMeter.style.width = (progress * 100) + '%';
+      }
+
+      function stopIntroDemo() {
+        window.clearTimeout(introTimer);
+      }
+
+      themeToggle.addEventListener('click', function() {
+        setTheme(currentTheme() === 'dark' ? 'light' : 'dark', true);
+      });
+
+      themeMedia.addEventListener('change', function(event) {
+        var savedTheme = null;
+        try {
+          savedTheme = localStorage.getItem('nprogress-theme');
+        } catch (error) {
+          savedTheme = null;
+        }
+        if (!savedTheme) setTheme(event.matches ? 'dark' : 'light', false);
+      });
+
+      document.querySelectorAll('.version').forEach(function(element) {
+        element.textContent = NProgress.version;
+      });
+      NProgress.configure({ speed: 220, trickle: true, trickleSpeed: 700, failureColor: '#d34b5d' });
+      NProgress.on('start', function() { setDemoState('Loading', 'Fetching the next view', NProgress.status || 0.08, false); });
+      NProgress.on('progress', function(event) { setDemoState('Loading', 'Rendering partial progress', event.progress || 0, false); });
+      NProgress.on('inc', function(event) { setDemoState('Loading', 'Still working', event.progress || 0, false); });
+      NProgress.on('fail', function(event) { setDemoState('Failed', 'The request needs another try', event.progress || 0.08, true); });
+      NProgress.on('done', function() { setDemoState('Complete', 'Everything arrived', 1, false); });
+      NProgress.on('cancel', function() { setDemoState('Ready', 'Waiting for an action', 0, false); });
+
+      document.getElementById('b-0').addEventListener('click', function() { stopIntroDemo(); NProgress.start(); });
+      document.getElementById('b-40').addEventListener('click', function() { stopIntroDemo(); NProgress.set(0.4); });
+      document.getElementById('b-inc').addEventListener('click', function() { stopIntroDemo(); NProgress.inc(); });
+      document.getElementById('b-100').addEventListener('click', function() { stopIntroDemo(); NProgress.done(); });
+      document.getElementById('b-fail').addEventListener('click', function() { stopIntroDemo(); NProgress.start().set(0.58).fail(); });
+
+      document.body.hidden = false;
+      updateThemeButton();
+      NProgress.start();
+      introTimer = window.setTimeout(function() { NProgress.done(); }, 1300);
+    }());
   </script>
 </body>
 </html>
