@@ -13,9 +13,9 @@ operation is in flight.
 
 ## See it in motion
 
-This is a real capture of the published runtime moving through a request,
-completion, and failure state. GitHub selects the dark variant when the reader
-uses dark mode.
+Captured from the published runtime moving through a request, completion,
+and failure state. GitHub selects the dark variant when the reader uses
+dark mode.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/output-demo-dark.gif">
@@ -42,8 +42,7 @@ For direct browser use, load the published files:
 <script src="progressbeam.js"></script>
 ```
 
-The package is safe to import during SSR. Call DOM methods only after a
-browser document is available.
+Safe to import during SSR; see Content Security Policy and SSR.
 
 ## Usage
 
@@ -85,7 +84,7 @@ ProgressBeam.cancel();
 | `start()` | Starts the indicator and automatic trickling. |
 | `done(force)` | Completes and removes it; `force` renders it when idle. |
 | `set(progress)` | Sets a value from `0` to `1`; `1` completes it. |
-| `inc(amount)` | Increases by a specified or realistic random amount. |
+| `inc(amount)` | Increases by a specified or scheduled random amount. |
 | `dec(amount)` | Decreases by a specified or scheduled amount; no-op while idle. |
 | `reset()` | Removes the indicator and restores idle model and default settings. |
 | `promise(value)` | Tracks a promise, thenable, or jQuery Deferred. |
@@ -235,7 +234,7 @@ CSP notes:
 
 - **NProgress 0.2.0** (unmaintained): ProgressBeam keeps its API and fixes the ARIA roles, adds ESM/TypeScript/SSR support, and ships the requested delay, indeterminate, RTL, pause, failure, and event features.
 - **topbar 3.x** (canvas-based, ~2 KB): smaller, but no types, no ESM, no accessibility semantics, no spinner, and no indeterminate, failure, or event support.
-- **@bprogress/core 1.x** (TypeScript): the closest rival; ProgressBeam additionally offers valid ARIA with reduced-motion handling, lifecycle events, fail/cancel/reset, TanStack and fetch adapters, real-browser tests, size budgets, and provenance releases.
+- **@bprogress/core 1.x** (TypeScript): the closest rival. ProgressBeam adds valid ARIA with reduced-motion handling, lifecycle events, fail/cancel/reset, TanStack and fetch adapters, real-browser tests, size budgets, and provenance releases.
 
 ## Support and development
 
@@ -244,6 +243,14 @@ The maintained browser target is current Chromium, Firefox, and WebKit. Node.js
 
 See [MIGRATION.md](MIGRATION.md) for changes from ProgressBeam 0.2.0 and
 [CONTRIBUTING.md](CONTRIBUTING.md) for development and verification commands.
+
+## Acknowledgments
+
+ProgressBeam continues [NProgress](https://github.com/rstacruz/nprogress)
+by [Rico Sta. Cruz](https://github.com/rstacruz), built with help from
+[its contributors](https://github.com/rstacruz/nprogress/contributors).
+The original MIT license and copyright notice are preserved in
+[License.md](License.md).
 
 ## License
 
