@@ -13,6 +13,7 @@
 
   width: 100%;
   height: var(--progressbeam-height, 2px);
+  will-change: transform;
 }
 
 #progressbeam.progressbeam-failed .bar {
@@ -67,12 +68,38 @@
   position: absolute;
 }
 
+/* Keep the wrapper out of flex/grid layout in custom parents. */
+.progressbeam-custom-parent #progressbeam {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 0;
+}
+
 #progressbeam.progressbeam-rtl .bar {
   left: auto;
   right: 0;
 }
 
+#progressbeam.progressbeam-rtl .peg {
+  right: auto;
+  left: 0;
+}
+
+/* Bottom placement pins the bar and spinner to the viewport base. */
+#progressbeam.progressbeam-bottom .bar {
+  top: auto;
+  bottom: 0;
+}
+
+#progressbeam.progressbeam-bottom .spinner {
+  top: auto;
+  bottom: 15px;
+}
+
 #progressbeam.progressbeam-indeterminate .bar {
+  -webkit-animation: progressbeam-indeterminate 1.5s infinite ease-in-out;
   animation: progressbeam-indeterminate 1.5s infinite ease-in-out;
   transform: translate3d(-100%, 0, 0);
 }
@@ -85,6 +112,11 @@
   }
 }
 
+@-webkit-keyframes progressbeam-indeterminate {
+  0% { -webkit-transform: translate3d(-100%, 0, 0); }
+  50% { -webkit-transform: translate3d(-10%, 0, 0); }
+  100% { -webkit-transform: translate3d(100%, 0, 0); }
+}
 @keyframes progressbeam-indeterminate {
   0% { transform: translate3d(-100%, 0, 0); }
   50% { transform: translate3d(-10%, 0, 0); }

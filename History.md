@@ -1,3 +1,13 @@
+## [Unreleased]
+
+ * Add `dec()` for decreasing the active value and a `position` option with
+   bottom placement for the bar and spinner.
+ * Harden the ESM entry with default and named exports over the single UMD
+   source, and ship zero-dependency framework adapters for fetch tracking,
+   router guards, React, Next.js App Router, and Vue.
+ * Add size budgets, adapter checks, source-hygiene (CSP) tests, and CSP/SSR
+   documentation.
+
 ## [v1.0.0] - 2026-09-15
 
 ProgressBeam is the independent continuation of the NProgress browser utility,

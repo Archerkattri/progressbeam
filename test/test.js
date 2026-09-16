@@ -492,5 +492,292 @@
         }, 35);
       });
     });
+    describe('maximum ceiling (#170)', function() {
+      it('should cap inc() at the configured maximum', function() {
+        ProgressBeam.configure({ maximum: 0.75 });
+        ProgressBeam.start();
+        ProgressBeam.set(0.7);
+        ProgressBeam.inc(0.2);
+        assert.equal(ProgressBeam.status, 0.75);
+      });
+
+      it('should let explicit set() bypass the increment ceiling', function() {
+        ProgressBeam.configure({ maximum: 0.75 });
+        ProgressBeam.start();
+        ProgressBeam.set(0.9);
+        assert.equal(ProgressBeam.status, 0.9);
+      });
+
+      it('should never move backwards when incrementing above the ceiling', function() {
+        ProgressBeam.configure({ maximum: 0.75 });
+        ProgressBeam.start();
+        ProgressBeam.set(0.9);
+        ProgressBeam.inc();
+        assert.equal(ProgressBeam.status, 0.9);
+      });
+
+      it('should clamp an out-of-range maximum into [minimum, 1]', function() {
+        ProgressBeam.configure({ maximum: 5 });
+        assert.equal(ProgressBeam.settings.maximum, 1);
+        ProgressBeam.configure({ maximum: -1 });
+        assert.equal(ProgressBeam.settings.maximum, ProgressBeam.settings.minimum);
+        ProgressBeam.configure({ maximum: NaN });
+        assert.equal(ProgressBeam.settings.maximum, 0.994);
+      });
+
+      it('should raise a maximum below the minimum up to the minimum', function() {
+        ProgressBeam.configure({ minimum: 0.5, maximum: 0.1 });
+        assert.equal(ProgressBeam.settings.maximum, 0.5);
+      });
+
+      it('should ignore non-numeric set() values', function() {
+        ProgressBeam.set(NaN);
+        assert.equal(ProgressBeam.status, null);
+        assert.equal(document.querySelectorAll('#progressbeam').length, 0);
+        ProgressBeam.start();
+        var status = ProgressBeam.status;
+        ProgressBeam.set(NaN);
+        assert.equal(ProgressBeam.status, status);
+      });
+    });
+
+    describe('scheduler and cancellation (#161, #38)', function() {
+      it('should serialize rapid set() calls without stalling', function(done) {
+        ProgressBeam.configure({ speed: 5 });
+        ProgressBeam.set(0.1).set(0.5).set(0.9);
+        assert.equal(ProgressBeam.status, 0.9);
+
+        setTimeout(function() {
+          assert.equal(ProgressBeam.status, 0.9);
+          assert.equal(document.querySelectorAll('#progressbeam').length, 1);
+          done();
+        }, 60);
+      });
+
+      it('should leave no timers behind after cancel during completion', function(done) {
+        ProgressBeam.configure({ speed: 10 });
+        ProgressBeam.start();
+        ProgressBeam.set(0.5).set(1);
+        ProgressBeam.cancel();
+
+        setTimeout(function() {
+          assert.equal(ProgressBeam.status, null);
+          assert.equal(document.querySelectorAll('#progressbeam').length, 0);
+          ProgressBeam.start();
+          assert.equal(document.querySelectorAll('#progressbeam').length, 1);
+          done();
+        }, 60);
+      });
+
+      it('cancel() when idle should be a silent no-op', function() {
+        var events = [];
+        ProgressBeam.on('cancel', function() { events.push('cancel'); });
+        assert.equal(ProgressBeam.cancel(), ProgressBeam);
+        assert.equal(ProgressBeam.status, null);
+        assert.equal(ProgressBeam.isRendered(), false);
+        assert.deepEqual(events, []);
+      });
+
+      it('cancel() after done() should clear the pending fade', function(done) {
+        ProgressBeam.configure({ speed: 10 });
+        ProgressBeam.start();
+        ProgressBeam.done();
+        ProgressBeam.cancel();
+
+        setTimeout(function() {
+          assert.equal(ProgressBeam.status, null);
+          assert.equal(document.querySelectorAll('#progressbeam').length, 0);
+          done();
+        }, 60);
+      });
+
+      it('done() after cancel() should not render', function() {
+        ProgressBeam.start();
+        ProgressBeam.cancel();
+        ProgressBeam.done();
+        assert.equal(document.querySelectorAll('#progressbeam').length, 0);
+        assert.equal(ProgressBeam.status, null);
+      });
+    });
+
+    describe('failure and removal state machine', function() {
+      it('fail() when idle without force should be a no-op', function() {
+        var events = [];
+        ProgressBeam.on('fail', function() { events.push('fail'); });
+        ProgressBeam.fail();
+        assert.equal(ProgressBeam.failed, false);
+        assert.deepEqual(events, []);
+        assert.equal(document.querySelectorAll('#progressbeam').length, 0);
+      });
+
+      it('fail() then done() should clear the failure state', function() {
+        ProgressBeam.start().fail();
+        assert.equal(ProgressBeam.failed, true);
+        ProgressBeam.done();
+        assert.equal(ProgressBeam.failed, false);
+        assert.equal(ProgressBeam.status, null);
+      });
+
+      it('remove() should keep the status model so set() can re-render', function() {
+        ProgressBeam.start();
+        ProgressBeam.remove();
+        assert.equal(ProgressBeam.isRendered(), false);
+        assert.equal(ProgressBeam.isStarted(), true);
+        ProgressBeam.set(0.5);
+        assert.equal(document.querySelectorAll('#progressbeam').length, 1);
+        assert.equal(ProgressBeam.status, 0.5);
+      });
+
+      it('should use compositor-friendly transitions (#222)', function() {
+        ProgressBeam.set(0.5);
+        var positioning = ProgressBeam.getPositioningCSS();
+        var style = document.querySelector('#progressbeam .bar').getAttribute('style');
+        if (positioning === 'margin') {
+          assert.ok(style.indexOf('margin-left') !== -1);
+        } else {
+          assert.ok(style.indexOf('transform') !== -1);
+        }
+        assert.equal(style.indexOf('all ') !== -1, false);
+      });
+    });
+
+    describe('SSR and DOM-absent guards', function() {
+      it('should advance the status model without a document', function() {
+        var saved = {
+          window: global.window,
+          document: global.document,
+          HTMLElement: global.HTMLElement,
+          Node: global.Node
+        };
+        delete global.window;
+        delete global.document;
+        delete global.HTMLElement;
+        delete global.Node;
+        try {
+          assert.equal(ProgressBeam.isRendered(), false);
+          assert.equal(ProgressBeam.render(), null);
+          assert.equal(ProgressBeam.getPositioningCSS(), 'translate3d');
+          ProgressBeam.start();
+          assert.equal(ProgressBeam.status, ProgressBeam.settings.minimum);
+          ProgressBeam.set(0.5);
+          assert.equal(ProgressBeam.status, 0.5);
+          ProgressBeam.inc();
+          assert.ok(ProgressBeam.status > 0.5);
+          ProgressBeam.fail();
+          assert.equal(ProgressBeam.failed, true);
+          ProgressBeam.cancel();
+          assert.equal(ProgressBeam.status, null);
+          ProgressBeam.remove();
+        } finally {
+          global.window = saved.window;
+          global.document = saved.document;
+          global.HTMLElement = saved.HTMLElement;
+          global.Node = saved.Node;
+        }
+      });
+    });
+
+    describe('CSS layout robustness (#175, #194, #222, #223)', function() {
+      var fs = require('node:fs');
+      var cssPath = require('node:path').join(__dirname, '..', 'progressbeam.css');
+      var css = fs.readFileSync(cssPath, 'utf8');
+
+      it('should keep the custom-parent wrapper out of flex layout', function() {
+        assert.ok(css.indexOf('.progressbeam-custom-parent #progressbeam {') !== -1);
+      });
+
+      it('should hint compositor-friendly bar animation', function() {
+        assert.ok(css.indexOf('will-change: transform') !== -1);
+      });
+
+      it('should ship prefixed indeterminate keyframes for mobile browsers', function() {
+        assert.ok(css.indexOf('@-webkit-keyframes progressbeam-indeterminate') !== -1);
+        assert.ok(css.indexOf('-webkit-animation: progressbeam-indeterminate') !== -1);
+      });
+
+      it('should mirror the peg in RTL mode', function() {
+        assert.ok(css.indexOf('#progressbeam.progressbeam-rtl .peg') !== -1);
+      });
+
+      it('should pin the bar and spinner to the base in bottom mode', function() {
+        assert.ok(css.indexOf('#progressbeam.progressbeam-bottom .bar') !== -1);
+        assert.ok(css.indexOf('#progressbeam.progressbeam-bottom .spinner') !== -1);
+      });
+    });
+
+    describe('.dec()', function() {
+      it('should be a no-op while idle', function() {
+        var result = ProgressBeam.dec();
+        assert.equal(result, ProgressBeam);
+        assert.equal(ProgressBeam.status, null);
+        assert.equal(document.querySelectorAll('#progressbeam').length, 0);
+      });
+
+      it('should subtract the default step from an active value', function() {
+        ProgressBeam.set(0.5);
+        ProgressBeam.dec();
+        assert.ok(Math.abs(ProgressBeam.status - 0.4) < 1e-9);
+      });
+
+      it('should subtract an explicit amount', function() {
+        ProgressBeam.set(0.5);
+        ProgressBeam.dec(0.2);
+        assert.ok(Math.abs(ProgressBeam.status - 0.3) < 1e-9);
+      });
+
+      it('should never drop below the minimum', function() {
+        ProgressBeam.set(0.1);
+        ProgressBeam.dec(0.9);
+        assert.equal(ProgressBeam.status, ProgressBeam.settings.minimum);
+      });
+    });
+
+    describe('.configure(position)', function() {
+      it('should default to top placement', function() {
+        assert.equal(ProgressBeam.settings.position, 'top');
+      });
+
+      it('should toggle the bottom class on the live indicator', function() {
+        ProgressBeam.set(0.5);
+        assert.equal(document.querySelectorAll('#progressbeam.progressbeam-bottom').length, 0);
+        ProgressBeam.configure({ position: 'bottom' });
+        assert.equal(document.querySelectorAll('#progressbeam.progressbeam-bottom').length, 1);
+        ProgressBeam.configure({ position: 'top' });
+        assert.equal(document.querySelectorAll('#progressbeam.progressbeam-bottom').length, 0);
+      });
+
+      it('should fall back to top for unsupported values', function() {
+        ProgressBeam.configure({ position: 'left' });
+        assert.equal(ProgressBeam.settings.position, 'top');
+      });
+    });
+
+    describe('source hygiene (CSP)', function() {
+      var fs = require('node:fs');
+      var sourcePath = require('node:path').join(__dirname, '..', 'progressbeam.js');
+      var source = fs.readFileSync(sourcePath, 'utf8');
+
+      it('should not use eval or the Function constructor', function() {
+        assert.equal(source.indexOf('eval('), -1);
+        assert.equal(source.indexOf('new Function'), -1);
+      });
+
+      it('should only assign innerHTML for the configured template', function() {
+        var matches = source.match(/innerHTML/g) || [];
+        assert.equal(matches.length, 1);
+        assert.ok(source.indexOf('progress.innerHTML = Settings.template') !== -1);
+      });
+
+      it('should keep adapters free of eval and innerHTML', function() {
+        var adapters = ['history.mjs', 'react.mjs', 'next.mjs', 'vue.mjs'];
+        adapters.forEach(function(file) {
+          var code = fs.readFileSync(
+            require('node:path').join(__dirname, '..', 'adapters', file), 'utf8'
+          );
+          assert.equal(code.indexOf('eval('), -1, file);
+          assert.equal(code.indexOf('innerHTML'), -1, file);
+        });
+      });
+    });
   });
 })();

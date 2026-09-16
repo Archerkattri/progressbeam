@@ -79,6 +79,7 @@ ProgressBeam.cancel();
 | `done(force)` | Completes and removes it; `force` renders it when idle. |
 | `set(progress)` | Sets a value from `0` to `1`; `1` completes it. |
 | `inc(amount)` | Increases by a specified or realistic random amount. |
+| `dec(amount)` | Decreases by a specified amount (`0.1` default); no-op while idle. |
 | `promise(value)` | Tracks a promise, thenable, or jQuery Deferred. |
 | `cancel()` | Removes the indicator and resets its state. |
 | `fail(force)` | Keeps the indicator visible with failure styling. |
@@ -121,6 +122,7 @@ ProgressBeam.configure({
 | `zIndex` | `1031` | Bar and spinner stacking order. |
 | `indeterminate` | `false` | Uses an animated indeterminate bar. |
 | `rtl` | `false` | Renders progress from right to left. |
+| `position` | `'top'` | Bar placement: `'top'` or `'bottom'`. |
 | `ariaLabel` | `'Loading'` | Accessible label for the progress bar. |
 | `parent` | `'body'` | CSS selector or DOM element receiving the indicator. |
 
@@ -136,6 +138,35 @@ document.addEventListener('pjax:start', () => ProgressBeam.start());
 document.addEventListener('pjax:end', () => ProgressBeam.done());
 ```
 
+## Framework adapters
+
+Zero-dependency helpers ship under `progressbeam/adapters/*` (ESM only).
+Framework peers are required only by the adapter that uses them:
+
+```js
+// Vanilla: track fetch() calls (no peers)
+import { createFetchTracker } from 'progressbeam/adapters/history';
+const trackedFetch = createFetchTracker(ProgressBeam);
+await trackedFetch('/api/data');
+
+// Vanilla: router guards (vue-router compatible)
+import { bindRouterGuards } from 'progressbeam/adapters/history';
+const unbind = bindRouterGuards(router, ProgressBeam);
+
+// React (peer: react)
+import { useProgressBeam } from 'progressbeam/adapters/react';
+useProgressBeam(isLoading);
+
+// Next.js App Router (peer: react)
+import { createAppRouterTracker } from 'progressbeam/adapters/next';
+const tracker = createAppRouterTracker(ProgressBeam);
+tracker.finish(usePathname()); // inside an effect keyed on the pathname
+
+// Vue (peer: vue)
+import { useProgressBeam } from 'progressbeam/adapters/vue';
+useProgressBeam();
+```
+
 ## Accessibility and customization
 
 The default template uses `role="progressbar"`, `aria-valuemin`,
@@ -144,6 +175,22 @@ technology, and reduced-motion preferences disable its animation.
 
 Custom templates must include an element matching `barSelector`. Templates are
 inserted as HTML; never pass untrusted input to `template`.
+
+## Content Security Policy and SSR
+
+The package is safe to import during SSR: without a `document` only the
+status model advances, and `render()` returns `null`. Call DOM methods after
+a browser document is available.
+
+CSP notes:
+
+- `script-src`: the distributed files are static scripts with no `eval` or
+  `new Function` (enforced by the source-hygiene suite), so they can be
+  allow-listed or hashed like any first-party script.
+- `style-src`: bar positioning is applied through element styles at runtime,
+  so a strict `style-src` policy needs `'unsafe-inline'` for the indicator to
+  animate. The stylesheet itself is a static file.
+- `template` is assigned via `innerHTML`; treat it as trusted markup only.
 
 ## Support and development
 

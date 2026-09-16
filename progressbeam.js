@@ -37,6 +37,7 @@
     failureColor: null,
     indeterminate: false,
     rtl: false,
+    position: 'top',
     ariaLabel: 'Loading',
     height: '2px',
     zIndex: 1031,
@@ -65,6 +66,23 @@
     for (key in options) {
       value = options[key];
       if (value !== undefined && Object.prototype.hasOwnProperty.call(options, key)) Settings[key] = value;
+    }
+
+    // #170: the increment ceiling stays below 1.0 by default but is
+    // configurable. Only inc()/trickle() are capped; explicit set() values
+    // bypass it so callers can always drive the bar to any value.
+    if (typeof Settings.maximum !== 'number' || isNaN(Settings.maximum)) {
+      Settings.maximum = 0.994;
+    } else {
+      Settings.maximum = clamp(Settings.maximum, 0, 1);
+      if (typeof Settings.minimum === 'number' && !isNaN(Settings.minimum) &&
+          Settings.maximum < Settings.minimum) Settings.maximum = Settings.minimum;
+    }
+
+    // Only 'top' and 'bottom' are supported bar positions; anything else
+    // falls back to the legacy top placement.
+    if (Settings.position !== 'top' && Settings.position !== 'bottom') {
+      Settings.position = 'top';
     }
 
     if (wasRendered) {
@@ -128,6 +146,7 @@
    */
 
   ProgressBeam.set = function(n) {
+    if (typeof n !== 'number' || isNaN(n)) return this;
     var started = ProgressBeam.isStarted();
 
     if (delayedStartPending) {
@@ -138,6 +157,8 @@
     n = clamp(n, Settings.minimum, 1);
     ProgressBeam.status = (n === 1 ? null : n);
     emit('progress', { progress: n, status: ProgressBeam.status });
+    // SSR-safe: without a document only the status model advances.
+    if (typeof document === 'undefined') return this;
 
     var progress = ProgressBeam.render(!started),
         bar      = progress.querySelector(Settings.barSelector),
@@ -171,7 +192,7 @@
 
         schedule(function() {
           css(progress, {
-            transition: 'all ' + speed + 'ms linear',
+            transition: 'opacity ' + speed + 'ms linear',
             opacity: 0
           });
           schedule(function() {
@@ -271,6 +292,7 @@
         else { amount = 0; }
       }
 
+      if (n >= Settings.maximum) return ProgressBeam.set(n);
       n = clamp(n + amount, 0, Settings.maximum);
       return ProgressBeam.set(n);
     }
@@ -278,6 +300,26 @@
 
   ProgressBeam.trickle = function() {
     return ProgressBeam.inc();
+  };
+
+  /**
+   * Decrements the active value without dropping below the minimum.
+   * A no-op while idle: there is nothing to decrement.
+   *
+   *     ProgressBeam.dec();
+   *     ProgressBeam.dec(0.2);
+   */
+
+  ProgressBeam.dec = function(amount) {
+    var n = ProgressBeam.status;
+
+    if (!n) {
+      return this;
+    }
+    if (typeof amount !== 'number') {
+      amount = 0.1;
+    }
+    return ProgressBeam.set(n - amount);
   };
 
   ProgressBeam.paused = false;
@@ -348,6 +390,7 @@
    */
 
   ProgressBeam.render = function(fromStart) {
+    if (typeof document === 'undefined') return null;
     if (ProgressBeam.isRendered()) return document.getElementById('progressbeam');
 
     addClass(document.documentElement, 'progressbeam-busy');
@@ -395,7 +438,6 @@
    */
 
   ProgressBeam.remove = function() {
-    if (typeof document === 'undefined') return this;
     var wasRendered = ProgressBeam.isRendered();
     var wasDelayedStartPending = delayedStartPending;
     cancelTimers();
@@ -403,6 +445,8 @@
     queue.clear();
     delayedStartPending = false;
     if (wasDelayedStartPending) ProgressBeam.status = null;
+    ProgressBeam.failed = false;
+    if (typeof document === 'undefined') return this;
     removeClass(document.documentElement, 'progressbeam-busy');
     var parent = currentParent || (isDOM(Settings.parent)
       ? Settings.parent
@@ -411,7 +455,6 @@
     var progress = document.getElementById('progressbeam');
     progress && removeElement(progress);
     currentParent = null;
-    ProgressBeam.failed = false;
     if (wasRendered) emit('remove', { progress: ProgressBeam.status, status: ProgressBeam.status });
     return this;
   };
@@ -421,9 +464,10 @@
    */
 
   ProgressBeam.cancel = function() {
+    var wasActive = ProgressBeam.isStarted() || ProgressBeam.isRendered() || delayedStartPending;
     ProgressBeam.remove();
     ProgressBeam.status = null;
-    emit('cancel', { progress: null, status: null });
+    if (wasActive) emit('cancel', { progress: null, status: null });
     return this;
   };
 
@@ -435,6 +479,10 @@
     if (!ProgressBeam.status && !force) return this;
     if (!ProgressBeam.status && force) ProgressBeam.start();
     ProgressBeam.failed = true;
+    if (typeof document === 'undefined') {
+      emit('fail', { progress: ProgressBeam.status, status: ProgressBeam.status });
+      return this;
+    }
     var progress = ProgressBeam.render();
     updatePresentation(progress);
     emit('fail', { progress: ProgressBeam.status, status: ProgressBeam.status });
@@ -455,6 +503,7 @@
 
   ProgressBeam.getPositioningCSS = function() {
     // Inspect the document's supported style properties.
+    if (typeof document === 'undefined' || !document.body) return 'translate3d';
     var bodyStyle = document.body.style;
 
     // Check the vendor-prefixed variants used by older browsers.
@@ -556,6 +605,11 @@
     } else {
       removeClass(progress, 'progressbeam-rtl');
     }
+    if (Settings.position === 'bottom') {
+      addClass(progress, 'progressbeam-bottom');
+    } else {
+      removeClass(progress, 'progressbeam-bottom');
+    }
     if (ProgressBeam.failed) {
       addClass(progress, 'progressbeam-failed');
     } else {
@@ -586,7 +640,9 @@
       barCSS = { 'margin-left': toBarPerc(n)+'%' };
     }
 
-    barCSS.transition = 'all '+speed+'ms '+ease;
+    // #222: transition only the animated property so bar updates stay
+    // compositor-friendly instead of invalidating layout on every tick.
+    barCSS.transition = (Settings.positionUsing === 'margin' ? 'margin-left' : 'transform')+' '+speed+'ms '+ease;
 
     return barCSS;
   }
@@ -615,7 +671,11 @@
     return enqueue;
   })();
 
-  /* Timers are grouped so removing the indicator cancels all pending work. */
+  /* #161: the scheduler stays timer-based. Transitions are sequenced with
+     setTimeout so sequencing works in every target environment (including
+     SSR-adjacent runtimes and jsdom) with zero dependencies; the CSS
+     transition on the bar provides the visual smoothness, and grouping the
+     timers means removing the indicator cancels all pending work. */
 
   var timers = [];
   var trickleTimers = [];

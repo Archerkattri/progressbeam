@@ -16,6 +16,7 @@ export interface ProgressBeamSettings {
   failureColor: string | null;
   indeterminate: boolean;
   rtl: boolean;
+  position: 'top' | 'bottom';
   ariaLabel: string | null;
   height: string | null;
   zIndex: number | string | null;
@@ -47,6 +48,7 @@ export interface ProgressBeamApi {
   done(force?: boolean): this;
   fail(force?: boolean): this;
   inc(amount?: number): this;
+  dec(amount?: number): this;
   trickle(): this;
   pause(): this;
   resume(): this;
@@ -61,3 +63,4 @@ export interface ProgressBeamApi {
 declare const ProgressBeam: ProgressBeamApi;
 
 export = ProgressBeam;
+export as namespace ProgressBeam;

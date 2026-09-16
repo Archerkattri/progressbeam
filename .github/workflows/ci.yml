@@ -69,5 +69,17 @@ jobs:
       - name: Verify package contents
         run: npm run pack:check
 
+      - name: Check size budgets
+        run: npm run test:size
+
+      - name: Check framework adapters
+        run: npm run test:adapters
+
+      - name: Lint package publishing setup
+        run: npx -y publint
+
+      - name: Check TypeScript resolution
+        run: npx -y @arethetypeswrong/cli --pack .
+
       - name: Audit production dependencies
         run: npm audit --audit-level=high

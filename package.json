@@ -15,7 +15,9 @@
     "test:runtime": "node test/runtime-smoke.cjs",
     "test:packed": "node test/packed-smoke.cjs",
     "typecheck": "tsc --project test/tsconfig.json",
-    "pack:check": "node test/pack-check.cjs"
+    "pack:check": "node test/pack-check.cjs",
+    "test:size": "node test/size-check.cjs",
+    "test:adapters": "node test/adapters-check.cjs"
   },
   "main": "progressbeam.js",
   "types": "progressbeam.d.ts",
@@ -25,14 +27,15 @@
   "exports": {
     ".": {
       "types": "./progressbeam.d.ts",
-      "import": {
-        "node": "./progressbeam.js",
-        "default": "./progressbeam.mjs"
-      },
+      "import": "./progressbeam.mjs",
       "require": "./progressbeam.js",
       "default": "./progressbeam.js"
     },
     "./progressbeam.css": "./progressbeam.css",
+    "./adapters/*": {
+      "types": "./adapters/*.d.ts",
+      "import": "./adapters/*.mjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -40,6 +43,7 @@
     "progressbeam.mjs",
     "progressbeam.css",
     "progressbeam.d.ts",
+    "adapters/",
     "docs/output-demo.gif",
     "docs/output-demo-dark.gif",
     "Readme.md",
