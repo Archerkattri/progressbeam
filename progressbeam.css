@@ -98,6 +98,35 @@
   bottom: 15px;
 }
 
+/* Spinner corners. These come last so spinnerPosition wins over position. */
+#progressbeam.progressbeam-spinner-tr .spinner {
+  top: 15px;
+  right: 15px;
+  bottom: auto;
+  left: auto;
+}
+
+#progressbeam.progressbeam-spinner-tl .spinner {
+  top: 15px;
+  right: auto;
+  bottom: auto;
+  left: 15px;
+}
+
+#progressbeam.progressbeam-spinner-br .spinner {
+  top: auto;
+  right: 15px;
+  bottom: 15px;
+  left: auto;
+}
+
+#progressbeam.progressbeam-spinner-bl .spinner {
+  top: auto;
+  right: auto;
+  bottom: 15px;
+  left: 15px;
+}
+
 #progressbeam.progressbeam-indeterminate .bar {
   -webkit-animation: progressbeam-indeterminate 1.5s infinite ease-in-out;
   animation: progressbeam-indeterminate 1.5s infinite ease-in-out;

@@ -4,7 +4,7 @@ const path = require('node:path');
 const { pathToFileURL } = require('node:url');
 
 const root = path.resolve(__dirname, '..');
-const adapters = ['history.mjs', 'react.mjs', 'next.mjs', 'vue.mjs'];
+const adapters = ['history.mjs', 'react.mjs', 'next.mjs', 'vue.mjs', 'tanstack.mjs'];
 
 function stubBar(calls) {
   return {
@@ -70,6 +70,24 @@ async function main() {
 
   const minimal = { beforeEach: router.beforeEach, afterEach: router.afterEach };
   history.bindRouterGuards(minimal, bar)();
+
+  const tanstack = await import(pathToFileURL(path.join(root, 'adapters', 'tanstack.mjs')).href);
+  const subscriptions = {};
+  const tanstackRouter = {
+    subscribe: (event, handler) => {
+      subscriptions[event] = handler;
+      return () => { delete subscriptions[event]; };
+    }
+  };
+  calls.length = 0;
+  const unbindTanStack = tanstack.bindTanStackRouter(tanstackRouter, bar);
+  subscriptions.onBeforeLoad({ hrefChanged: false });
+  assert.deepEqual(calls, []);
+  subscriptions.onBeforeLoad({ hrefChanged: true });
+  subscriptions.onResolved();
+  assert.deepEqual(calls, ['start', 'done']);
+  unbindTanStack();
+  assert.deepEqual(Object.keys(subscriptions), []);
   console.log('Adapter behavior: ok');
 }
 

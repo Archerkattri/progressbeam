@@ -12,7 +12,8 @@ const budgets = {
   'adapters/history.mjs': { raw: 3000, gzip: 1500 },
   'adapters/react.mjs': { raw: 2000, gzip: 1000 },
   'adapters/next.mjs': { raw: 3000, gzip: 1500 },
-  'adapters/vue.mjs': { raw: 2000, gzip: 1000 }
+  'adapters/vue.mjs': { raw: 2000, gzip: 1000 },
+  'adapters/tanstack.mjs': { raw: 2000, gzip: 1000 }
 };
 
 for (const [file, budget] of Object.entries(budgets)) {

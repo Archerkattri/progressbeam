@@ -38,12 +38,18 @@
     indeterminate: false,
     rtl: false,
     position: 'top',
+    spinnerPosition: 'top-right',
     ariaLabel: 'Loading',
     height: '2px',
     zIndex: 1031,
     parent: 'body',
     template: '<div class="bar" data-progressbeam="bar" role="progressbar" aria-valuemin="0" aria-valuemax="100"><div class="peg"></div></div><div class="spinner" data-progressbeam="spinner" aria-hidden="true"><div class="spinner-icon"></div></div>'
   };
+
+  var Defaults = {};
+  for (var defaultKey in Settings) {
+    if (Object.prototype.hasOwnProperty.call(Settings, defaultKey)) Defaults[defaultKey] = Settings[defaultKey];
+  }
 
   /**
    * Updates configuration.
@@ -83,6 +89,15 @@
     // falls back to the legacy top placement.
     if (Settings.position !== 'top' && Settings.position !== 'bottom') {
       Settings.position = 'top';
+    }
+
+    // The spinner pins to one viewport corner; anything else falls back to
+    // the legacy top-right placement.
+    if (Settings.spinnerPosition !== 'top-right' &&
+        Settings.spinnerPosition !== 'top-left' &&
+        Settings.spinnerPosition !== 'bottom-right' &&
+        Settings.spinnerPosition !== 'bottom-left') {
+      Settings.spinnerPosition = 'top-right';
     }
 
     if (wasRendered) {
@@ -304,7 +319,8 @@
 
   /**
    * Decrements the active value without dropping below the minimum.
-   * A no-op while idle: there is nothing to decrement.
+   * A no-op while idle: there is nothing to decrement. The default step
+   * mirrors the increment schedule, shrinking as the value drops.
    *
    *     ProgressBeam.dec();
    *     ProgressBeam.dec(0.2);
@@ -317,7 +333,10 @@
       return this;
     }
     if (typeof amount !== 'number') {
-      amount = 0.1;
+      if (n > 0.8) { amount = 0.1; }
+      else if (n > 0.5) { amount = 0.05; }
+      else if (n > 0.2) { amount = 0.02; }
+      else { amount = 0.01; }
     }
     return ProgressBeam.set(n - amount);
   };
@@ -472,6 +491,30 @@
   };
 
   /**
+   * Restores the idle model and the default settings. Removes the rendered
+   * indicator, clears timers and queued transitions, unpauses, clears the
+   * failure flag, and drops any setting keys added through configure().
+   * Event handlers are kept; use off() to remove them.
+   */
+
+  ProgressBeam.reset = function() {
+    var key;
+    ProgressBeam.remove();
+    ProgressBeam.status = null;
+    ProgressBeam.paused = false;
+    for (key in Settings) {
+      if (Object.prototype.hasOwnProperty.call(Settings, key) &&
+          !Object.prototype.hasOwnProperty.call(Defaults, key)) {
+        delete Settings[key];
+      }
+    }
+    for (key in Defaults) {
+      if (Object.prototype.hasOwnProperty.call(Defaults, key)) Settings[key] = Defaults[key];
+    }
+    return this;
+  };
+
+  /**
    * Marks the current operation as failed and keeps the indicator visible.
    */
 
@@ -548,6 +591,13 @@
     return (Settings.rtl ? 1 - n : -1 + n) * 100;
   }
 
+  function spinnerClass(position) {
+    if (position === 'top-left') return 'progressbeam-spinner-tl';
+    if (position === 'bottom-right') return 'progressbeam-spinner-br';
+    if (position === 'bottom-left') return 'progressbeam-spinner-bl';
+    return 'progressbeam-spinner-tr';
+  }
+
   function emit(event, payload) {
     var handlers = eventHandlers[event];
     if (!handlers) return;
@@ -610,6 +660,11 @@
     } else {
       removeClass(progress, 'progressbeam-bottom');
     }
+    removeClass(progress, 'progressbeam-spinner-tr');
+    removeClass(progress, 'progressbeam-spinner-tl');
+    removeClass(progress, 'progressbeam-spinner-br');
+    removeClass(progress, 'progressbeam-spinner-bl');
+    addClass(progress, spinnerClass(Settings.spinnerPosition));
     if (ProgressBeam.failed) {
       addClass(progress, 'progressbeam-failed');
     } else {
@@ -636,13 +691,22 @@
       barCSS = { transform: 'translate3d('+toBarPerc(n)+'%,0,0)' };
     } else if (Settings.positionUsing === 'translate') {
       barCSS = { transform: 'translate('+toBarPerc(n)+'%,0)' };
+    } else if (Settings.positionUsing === 'width') {
+      // Width positioning grows the bar from 0 to full width. RTL anchoring
+      // comes from the stylesheet; the stale render transform is cleared so
+      // it cannot offset the bar.
+      barCSS = { width: (n * 100)+'%', transform: 'none' };
     } else {
-      barCSS = { 'margin-left': toBarPerc(n)+'%' };
+      // Margin positioning shifts a full-width bar; clear the stale render
+      // transform for the same reason.
+      barCSS = { 'margin-left': toBarPerc(n)+'%', transform: 'none' };
     }
 
     // #222: transition only the animated property so bar updates stay
     // compositor-friendly instead of invalidating layout on every tick.
-    barCSS.transition = (Settings.positionUsing === 'margin' ? 'margin-left' : 'transform')+' '+speed+'ms '+ease;
+    var animated = Settings.positionUsing === 'margin' ? 'margin-left'
+      : Settings.positionUsing === 'width' ? 'width' : 'transform';
+    barCSS.transition = animated+' '+speed+'ms '+ease;
 
     return barCSS;
   }

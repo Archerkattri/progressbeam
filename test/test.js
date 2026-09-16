@@ -713,10 +713,19 @@
         assert.equal(document.querySelectorAll('#progressbeam').length, 0);
       });
 
-      it('should subtract the default step from an active value', function() {
+      it('should shrink the default step as the value drops', function() {
+        ProgressBeam.set(0.9);
+        ProgressBeam.dec();
+        assert.ok(Math.abs(ProgressBeam.status - 0.8) < 1e-9);
+        ProgressBeam.set(0.6);
+        ProgressBeam.dec();
+        assert.ok(Math.abs(ProgressBeam.status - 0.55) < 1e-9);
         ProgressBeam.set(0.5);
         ProgressBeam.dec();
-        assert.ok(Math.abs(ProgressBeam.status - 0.4) < 1e-9);
+        assert.ok(Math.abs(ProgressBeam.status - 0.48) < 1e-9);
+        ProgressBeam.set(0.1);
+        ProgressBeam.dec();
+        assert.ok(Math.abs(ProgressBeam.status - 0.09) < 1e-9);
       });
 
       it('should subtract an explicit amount', function() {
@@ -749,6 +758,66 @@
       it('should fall back to top for unsupported values', function() {
         ProgressBeam.configure({ position: 'left' });
         assert.equal(ProgressBeam.settings.position, 'top');
+      });
+    });
+
+    describe('.reset()', function() {
+      it('should restore the idle model and default settings', function() {
+        var seen = [];
+        ProgressBeam.on('progress', function() { seen.push('progress'); });
+        ProgressBeam.configure({ minimum: 0.2, speed: 50, customKey: true });
+        ProgressBeam.set(0.5);
+        ProgressBeam.pause();
+        ProgressBeam.fail();
+        var result = ProgressBeam.reset();
+        assert.equal(result, ProgressBeam);
+        assert.equal(ProgressBeam.status, null);
+        assert.equal(ProgressBeam.paused, false);
+        assert.equal(ProgressBeam.failed, false);
+        assert.equal(ProgressBeam.settings.minimum, 0.08);
+        assert.equal(ProgressBeam.settings.speed, 200);
+        assert.equal('customKey' in ProgressBeam.settings, false);
+        assert.equal(document.querySelectorAll('#progressbeam').length, 0);
+        ProgressBeam.set(0.5);
+        assert.equal(seen.length > 0, true);
+      });
+    });
+
+    describe('.configure(positionUsing)', function() {
+      it('should size the bar by width in width mode', function() {
+        ProgressBeam.configure({ positionUsing: 'width' });
+        ProgressBeam.set(0.5);
+        var style = document.querySelector('#progressbeam .bar').getAttribute('style');
+        assert.ok(style.indexOf('width: 50%') !== -1);
+        assert.ok(style.indexOf('translate') === -1);
+      });
+
+      it('should clear the stale transform in margin mode', function() {
+        ProgressBeam.configure({ positionUsing: 'margin' });
+        ProgressBeam.set(0.5);
+        var style = document.querySelector('#progressbeam .bar').getAttribute('style');
+        assert.ok(style.indexOf('margin-left') !== -1);
+        assert.ok(style.indexOf('translate3d') === -1);
+        assert.ok(style.indexOf('translate(') === -1);
+      });
+    });
+
+    describe('.configure(spinnerPosition)', function() {
+      it('should default to the top-right corner', function() {
+        assert.equal(ProgressBeam.settings.spinnerPosition, 'top-right');
+      });
+
+      it('should move the spinner class between corners live', function() {
+        ProgressBeam.set(0.5);
+        assert.equal(document.querySelectorAll('#progressbeam.progressbeam-spinner-tr').length, 1);
+        ProgressBeam.configure({ spinnerPosition: 'bottom-left' });
+        assert.equal(document.querySelectorAll('#progressbeam.progressbeam-spinner-bl').length, 1);
+        assert.equal(document.querySelectorAll('#progressbeam.progressbeam-spinner-tr').length, 0);
+      });
+
+      it('should fall back to top-right for unsupported values', function() {
+        ProgressBeam.configure({ spinnerPosition: 'center' });
+        assert.equal(ProgressBeam.settings.spinnerPosition, 'top-right');
       });
     });
 

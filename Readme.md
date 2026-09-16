@@ -4,6 +4,13 @@ ProgressBeam is a slim, dependency-free progress indicator for browser
 applications. Use it while a page loads, a route changes, or an asynchronous
 operation is in flight.
 
+- Zero runtime dependencies; ESM, CommonJS, and direct-browser builds
+- TypeScript declarations with type-tested public API
+- Valid `progressbar` semantics, labeled status, reduced-motion support
+- Lifecycle events plus explicit fail, cancel, pause, and reset
+- Framework adapters for fetch, routers, React, Next.js, Vue, TanStack
+- Verified in real Chromium/Firefox/WebKit with enforced size budgets
+
 ## See it in motion
 
 This is a real capture of the published runtime moving through a request,
@@ -79,7 +86,8 @@ ProgressBeam.cancel();
 | `done(force)` | Completes and removes it; `force` renders it when idle. |
 | `set(progress)` | Sets a value from `0` to `1`; `1` completes it. |
 | `inc(amount)` | Increases by a specified or realistic random amount. |
-| `dec(amount)` | Decreases by a specified amount (`0.1` default); no-op while idle. |
+| `dec(amount)` | Decreases by a specified or scheduled amount; no-op while idle. |
+| `reset()` | Removes the indicator and restores idle model and default settings. |
 | `promise(value)` | Tracks a promise, thenable, or jQuery Deferred. |
 | `cancel()` | Removes the indicator and resets its state. |
 | `fail(force)` | Keeps the indicator visible with failure styling. |
@@ -87,8 +95,32 @@ ProgressBeam.cancel();
 | `configure(options)` | Updates the indicator settings. |
 | `on(event, handler)` / `off(...)` | Manages lifecycle event handlers. |
 
-`render()`, `remove()`, `isStarted()`, `isRendered()`, and `status` are also
-available for integrations that need direct state or DOM control.
+`render()`, `remove()`, `reset()`, `isStarted()`, `isRendered()`, and
+`status` are also available for integrations that need direct state or
+DOM control.
+
+## Lifecycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> idle
+    idle --> running: start / set
+    idle --> paused: pause
+    running --> paused: pause
+    paused --> running: resume
+    running --> completing: done / set(1)
+    completing --> idle: fade ends
+    completing --> idle: cancel / reset
+    running --> failed: fail
+    failed --> idle: done / cancel / reset
+    running --> idle: cancel / reset
+    paused --> idle: cancel / reset
+    failed --> failed: fail
+```
+
+`start()` and `set()` move out of idle; `done()` runs the completion fade;
+`fail()` holds the visible failure state; `cancel()` and `reset()` return
+to idle immediately, with `reset()` also restoring default settings.
 
 ## Configuration
 
@@ -115,7 +147,7 @@ ProgressBeam.configure({
 | `delay` | `0` | Delay before the indicator is rendered. |
 | `showBar` | `true` | Shows the progress bar. |
 | `showSpinner` | `true` | Shows the spinner. |
-| `barColor` | `null` | Bar color CSS value. |
+| `barColor` | `null` | Bar background; any CSS value, gradients included. |
 | `spinnerColor` | `null` | Spinner color CSS value. |
 | `failureColor` | `null` | Failure-state bar color CSS value. |
 | `height` | `'2px'` | Bar height. |
@@ -123,6 +155,8 @@ ProgressBeam.configure({
 | `indeterminate` | `false` | Uses an animated indeterminate bar. |
 | `rtl` | `false` | Renders progress from right to left. |
 | `position` | `'top'` | Bar placement: `'top'` or `'bottom'`. |
+| `spinnerPosition` | `'top-right'` | Spinner corner: top/bottom + left/right. |
+| `positionUsing` | `''` (auto) | Bar animation: transform, margin, or width. |
 | `ariaLabel` | `'Loading'` | Accessible label for the progress bar. |
 | `parent` | `'body'` | CSS selector or DOM element receiving the indicator. |
 
@@ -165,6 +199,10 @@ tracker.finish(usePathname()); // inside an effect keyed on the pathname
 // Vue (peer: vue)
 import { useProgressBeam } from 'progressbeam/adapters/vue';
 useProgressBeam();
+
+// TanStack Router (no runtime dependency)
+import { bindTanStackRouter } from 'progressbeam/adapters/tanstack';
+const unbind = bindTanStackRouter(router, ProgressBeam);
 ```
 
 ## Accessibility and customization
@@ -191,6 +229,13 @@ CSP notes:
   so a strict `style-src` policy needs `'unsafe-inline'` for the indicator to
   animate. The stylesheet itself is a static file.
 - `template` is assigned via `innerHTML`; treat it as trusted markup only.
+- No `<style>` elements are injected at runtime, so no nonce plumbing is needed.
+
+## How it compares
+
+- **NProgress 0.2.0** (unmaintained): ProgressBeam keeps its API and fixes the ARIA roles, adds ESM/TypeScript/SSR support, and ships the requested delay, indeterminate, RTL, pause, failure, and event features.
+- **topbar 3.x** (canvas-based, ~2 KB): smaller, but no types, no ESM, no accessibility semantics, no spinner, and no indeterminate, failure, or event support.
+- **@bprogress/core 1.x** (TypeScript): the closest rival; ProgressBeam additionally offers valid ARIA with reduced-motion handling, lifecycle events, fail/cancel/reset, TanStack and fetch adapters, real-browser tests, size budgets, and provenance releases.
 
 ## Support and development
 

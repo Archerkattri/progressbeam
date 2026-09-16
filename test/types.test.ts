@@ -3,6 +3,7 @@ import { createFetchTracker, bindRouterGuards } from 'progressbeam/adapters/hist
 import { useProgressBeam as useReactProgress, trackPromise } from 'progressbeam/adapters/react';
 import { createAppRouterTracker } from 'progressbeam/adapters/next';
 import { useProgressBeam as useVueProgress } from 'progressbeam/adapters/vue';
+import { bindTanStackRouter } from 'progressbeam/adapters/tanstack';
 
 ProgressBeam.configure({
   minimum: 0.1,
@@ -38,3 +39,8 @@ const appTracker = createAppRouterTracker();
 appTracker.finish('/');
 void appTracker;
 void useVueProgress;
+ProgressBeam.reset();
+const tanstackUnbind = bindTanStackRouter({
+  subscribe: (event, handler) => { void event; void handler; return () => undefined; }
+});
+void tanstackUnbind;

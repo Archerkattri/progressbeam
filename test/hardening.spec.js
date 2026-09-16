@@ -90,6 +90,16 @@ test('pins the bar and spinner to the base in bottom mode', async ({ page }) => 
   expect(Math.abs((barBox.y + barBox.height) - viewport.height)).toBeLessThan(2);
 });
 
+test('pins the spinner to the configured corner', async ({ page }) => {
+  await page.evaluate(() => {
+    window.ProgressBeam.configure({ spinnerPosition: 'bottom-left' });
+    window.ProgressBeam.set(0.5);
+  });
+
+  await expect(page.locator('#progressbeam.progressbeam-spinner-bl .spinner')).toHaveCSS('bottom', '15px');
+  await expect(page.locator('#progressbeam.progressbeam-spinner-bl .spinner')).toHaveCSS('left', '15px');
+});
+
 test('preserves spinner animation under a custom parent (#38)', async ({ page }) => {
   await page.evaluate(() => {
     const parent = document.createElement('div');

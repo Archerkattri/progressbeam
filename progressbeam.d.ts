@@ -17,6 +17,7 @@ export interface ProgressBeamSettings {
   indeterminate: boolean;
   rtl: boolean;
   position: 'top' | 'bottom';
+  spinnerPosition: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left';
   ariaLabel: string | null;
   height: string | null;
   zIndex: number | string | null;
@@ -56,6 +57,7 @@ export interface ProgressBeamApi {
   render(fromStart?: boolean): HTMLElement;
   remove(): this;
   cancel(): this;
+  reset(): this;
   isRendered(): boolean;
   getPositioningCSS(): string;
 }

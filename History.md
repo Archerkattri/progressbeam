@@ -7,6 +7,9 @@
    router guards, React, Next.js App Router, and Vue.
  * Add size budgets, adapter checks, source-hygiene (CSP) tests, and CSP/SSR
    documentation.
+ * Add `reset()`, graduated `dec()` steps, `width` bar positioning with stale
+   transform cleanup, four-corner `spinnerPosition`, and a TanStack Router
+   adapter ahead of the competing draft PR.
 
 ## [v1.0.0] - 2026-09-15
 

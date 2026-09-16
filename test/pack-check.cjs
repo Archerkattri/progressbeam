@@ -46,6 +46,8 @@ try {
     'adapters/next.d.ts',
     'adapters/vue.mjs',
     'adapters/vue.d.ts',
+    'adapters/tanstack.mjs',
+    'adapters/tanstack.d.ts',
     'docs/output-demo.gif',
     'docs/output-demo-dark.gif',
     'package.json'
