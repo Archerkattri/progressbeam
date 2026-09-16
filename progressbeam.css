@@ -1,4 +1,4 @@
-/* Make clicks pass-through */
+/* Keep the indicator out of pointer-event handling. */
 #progressbeam {
   pointer-events: none;
 }
@@ -19,7 +19,7 @@
   background: var(--progressbeam-failure-color, #d33);
 }
 
-/* Fancy blur effect */
+/* The peg supplies the moving bar's completion glow. */
 #progressbeam .peg {
   display: block;
   position: absolute;
@@ -34,7 +34,7 @@
           transform: rotate(3deg) translate(0px, -4px);
 }
 
-/* Remove these to get rid of the spinner */
+/* The spinner is independently removable through showSpinner. */
 #progressbeam .spinner {
   display: block;
   position: fixed;

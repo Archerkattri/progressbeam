@@ -252,7 +252,7 @@
   };
 
   /**
-   * Increments by a realistic amount.
+   * Increments the active value without reaching the configured maximum.
    */
 
   ProgressBeam.inc = function(amount) {
@@ -355,8 +355,6 @@
     var progress = document.createElement('div');
     progress.id = 'progressbeam';
     progress.innerHTML = Settings.template;
-
-
 
     var bar = progress.querySelector(Settings.barSelector),
         perc = fromStart ? (Settings.rtl ? '100' : '-100') : toBarPerc(ProgressBeam.status || 0),
