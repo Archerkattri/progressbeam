@@ -9,7 +9,7 @@
    documentation.
  * Add `reset()`, graduated `dec()` steps, `width` bar positioning with stale
    transform cleanup, four-corner `spinnerPosition`, and a TanStack Router
-   adapter ahead of the competing draft PR.
+   adapter.
 
 ## [v1.0.0] - 2026-09-15
 
@@ -17,7 +17,7 @@ ProgressBeam is the independent continuation of the NProgress browser utility,
 with a new package identity and modernized distribution and browser behavior.
 
  * Rename the package, browser global, DOM identifiers, CSS variables, and entry files to ProgressBeam.
- * Preserve the core progress API while adding a clean ESM/CJS package surface and TypeScript declarations.
+ * Preserve the core progress API.
 
  * Add TypeScript declarations and package exports for CommonJS and ESM consumers.
  * Add SSR-safe imports, missing-parent fallback, cancellable timers, and explicit cancellation.

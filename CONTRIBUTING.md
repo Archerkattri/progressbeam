@@ -24,7 +24,7 @@ Browser tests use Playwright Chromium, Firefox, and WebKit. If the browsers are
 not installed locally, run `npx playwright install chromium firefox webkit`
 once.
 
-CI additionally runs `publint` and `@arethetypeswrong/cli --pack .` against
+CI also runs `publint` and `@arethetypeswrong/cli --pack .` against
 the packed tarball. Run them before release when registry access is available;
 on machines where `npx` cannot reach the registry, the CI run is the gate.
 

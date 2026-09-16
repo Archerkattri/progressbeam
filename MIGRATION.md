@@ -23,9 +23,6 @@ import 'progressbeam/progressbeam.css';
 // Browser ESM resolves to the package's native .mjs entry.
 ```
 
-The package can be imported during SSR. Only call DOM methods after a browser
-document is available.
-
 ## Namespace changes
 
 Update direct browser integrations and custom CSS selectors:
@@ -46,13 +43,15 @@ include an element matching `barSelector`; do not inject untrusted input into
 ## New capabilities
 
 - `delay`, `showBar`, `showSpinner`, `barColor`, `spinnerColor`, `failureColor`,
-  `height`, `zIndex`, `maximum`, `indeterminate`, and `rtl` configuration.
-- `pause()`, `resume()`, `cancel()`, and `fail()` methods.
+  `height`, `zIndex`, `maximum`, `indeterminate`, `rtl`, `position`,
+  `spinnerPosition`, and `positionUsing` configuration.
+- `dec()`, `pause()`, `resume()`, `cancel()`, `fail()`, and `reset()` methods.
 - `on()` / `off()` lifecycle hooks for framework-neutral integrations.
+- Framework adapters under `progressbeam/adapters/*`.
 
 ## Behavior to review
 
-`cancel()` resets the operation to idle. `remove()` retains its legacy behavior
-for callers that depend on the existing method. The maintained browser target
+`cancel()` resets the operation to idle. `remove()` keeps the legacy status
+model so `set()` can re-render. The maintained browser target
 is current Chromium, Firefox, and WebKit; Internet Explorer-specific behavior
 is no longer a release target.
