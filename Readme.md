@@ -269,7 +269,7 @@ entry for this release:
   author = {Attri, Krishi},
   title = {ProgressBeam},
   year = {2026},
-  version = {1.0.1},
+  version = {1.0.2},
   doi = {10.5281/zenodo.22821136},
   url = {https://github.com/Archerkattri/progressbeam}
 }

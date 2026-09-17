@@ -12,7 +12,7 @@ test('vanilla demo loads without a framework runtime', async ({ page }) => {
 
   await page.goto(demoUrl);
   await expect(page.locator('body')).not.toHaveAttribute('hidden', '');
-  await expect(page.locator('.version').first()).toHaveText('1.0.1');
+  await expect(page.locator('.version').first()).toHaveText('1.0.2');
   await expect(page.locator('#progressbeam')).toHaveCount(1);
   await expect(page.locator('#progressbeam')).toHaveCount(0);
 

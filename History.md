@@ -1,3 +1,8 @@
+## [v1.0.2] - 2026-09-17
+
+Patch release with no runtime changes: npm search keywords for package
+discovery.
+
 ## [v1.0.1] - 2026-09-17
 
 Patch release with no runtime changes: citation metadata (`CITATION.cff`,
