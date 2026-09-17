@@ -13,13 +13,13 @@ operation is in flight.
 
 ## See it in motion
 
-Captured from the published runtime moving through a request, completion,
-and failure state. GitHub selects the dark variant when the reader uses
-dark mode.
+Captured from the published runtime moving through progress, pause,
+failure, reset, and completion. GitHub selects the dark variant when the
+reader uses dark mode.
 
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="docs/output-demo-dark.gif">
-  <img src="docs/output-demo.gif" alt="Animated ProgressBeam demo showing loading, completion, and failure states" width="900">
+  <img src="docs/output-demo.gif" alt="Animated ProgressBeam demo showing progress, pause, failure, and reset states" width="900">
 </picture>
 
 ## Install

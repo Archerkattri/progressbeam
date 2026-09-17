@@ -6,6 +6,7 @@ const root = path.resolve(__dirname, '..');
 const port = Number(process.env.PLAYWRIGHT_PORT || 4173);
 const contentTypes = {
   '.css': 'text/css',
+  '.gif': 'image/gif',
   '.html': 'text/html',
   '.js': 'text/javascript',
   '.mjs': 'text/javascript'

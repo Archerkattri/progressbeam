@@ -24,6 +24,10 @@ Browser tests use Playwright Chromium, Firefox, and WebKit. If the browsers are
 not installed locally, run `npx playwright install chromium firefox webkit`
 once.
 
+The README GIFs are captured from the demo page, not recorded by hand. After
+changing the demo, regenerate them with `npm run capture:demo` (needs
+Playwright Chromium; writes `docs/output-demo.gif` and the dark variant).
+
 CI also runs `publint` and `@arethetypeswrong/cli --pack .` against
 the packed tarball. Run them before release when registry access is available;
 on machines where `npx` cannot reach the registry, the CI run is the gate.

@@ -78,6 +78,11 @@
           <button id="b-inc" type="button">Increment <code>ProgressBeam.inc()</code></button>
           <button id="b-100" type="button">Complete <code>ProgressBeam.done()</code></button>
           <button class="danger-action" id="b-fail" type="button">Fail <code>ProgressBeam.fail()</code></button>
+          <button id="b-dec" type="button">Decrement <code>ProgressBeam.dec()</code></button>
+          <button id="b-pause" type="button">Pause <code>ProgressBeam.pause()</code></button>
+          <button id="b-resume" type="button">Resume <code>ProgressBeam.resume()</code></button>
+          <button id="b-cancel" type="button">Cancel <code>ProgressBeam.cancel()</code></button>
+          <button id="b-reset" type="button">Reset <code>ProgressBeam.reset()</code></button>
         </div>
       </div>
     </section>
@@ -118,6 +123,54 @@ ProgressBeam.done()</code></pre>
         <div class="api-row" role="row"><code role="cell">inc()</code><span role="cell">Moves forward without reaching completion.</span></div>
         <div class="api-row" role="row"><code role="cell">done()</code><span role="cell">Completes and removes the indicator.</span></div>
         <div class="api-row" role="row"><code role="cell">fail()</code><span role="cell">Marks the current operation as failed.</span></div>
+        <div class="api-row" role="row"><code role="cell">dec()</code><span role="cell">Moves backward; does nothing while idle.</span></div>
+        <div class="api-row" role="row"><code role="cell">promise(p)</code><span role="cell">Tracks a promise until it settles.</span></div>
+        <div class="api-row" role="row"><code role="cell">cancel()</code><span role="cell">Removes the indicator and resets its state.</span></div>
+        <div class="api-row" role="row"><code role="cell">reset()</code><span role="cell">Removes the indicator and restores default settings.</span></div>
+        <div class="api-row" role="row"><code role="cell">pause() / resume()</code><span role="cell">Pauses or resumes automatic trickling.</span></div>
+        <div class="api-row" role="row"><code role="cell">configure(options)</code><span role="cell">Updates the indicator settings.</span></div>
+        <div class="api-row" role="row"><code role="cell">on(event, fn) / off()</code><span role="cell">Subscribes or unsubscribes lifecycle handlers.</span></div>
+      </div>
+    </section>
+
+    <section class="content-section usage-section" id="configure" aria-labelledby="configure-title">
+      <div class="section-side">
+        <span class="section-number">04</span>
+        <h2 id="configure-title">Tune it</h2>
+        <p>Colors, timing, placement, and labels are settings. Change them once at startup.</p>
+      </div>
+      <div class="usage-content">
+        <div class="code-block">
+          <div class="code-head"><span>Settings</span><span>app.js</span></div>
+          <pre><code>ProgressBeam.configure({
+  barColor: <span class="code-string">'#2563eb'</span>,
+  failureColor: <span class="code-string">'#dc2626'</span>,
+  height: <span class="code-string">'3px'</span>,
+  position: <span class="code-string">'bottom'</span>,
+  delay: 120
+})</code></pre>
+        </div>
+      </div>
+    </section>
+
+    <section class="content-section usage-section" id="adapters" aria-labelledby="adapters-title">
+      <div class="section-side">
+        <span class="section-number">05</span>
+        <h2 id="adapters-title">Wire it up</h2>
+        <p>Small helpers connect the bar to fetch, routers, and frameworks. Each ships dependency-free.</p>
+      </div>
+      <div class="usage-content">
+        <div class="code-block">
+          <div class="code-head"><span>Fetch tracking</span><span>app.js</span></div>
+          <pre><code><span class="code-keyword">import</span> { createFetchTracker } <span class="code-keyword">from</span> <span class="code-string">'progressbeam/adapters/history'</span>
+<span class="code-keyword">const</span> trackedFetch = createFetchTracker(ProgressBeam)
+<span class="code-keyword">await</span> trackedFetch(<span class="code-string">'/api/data'</span>)</code></pre>
+        </div>
+        <div class="code-block">
+          <div class="code-head"><span>React</span><span>app.jsx</span></div>
+          <pre><code><span class="code-keyword">import</span> { useProgressBeam } <span class="code-keyword">from</span> <span class="code-string">'progressbeam/adapters/react'</span>
+useProgressBeam(isLoading)</code></pre>
+        </div>
       </div>
     </section>
 
@@ -211,12 +264,19 @@ ProgressBeam.done()</code></pre>
       ProgressBeam.on('fail', function(event) { setDemoState('Failed', 'The request needs another try', event.progress || 0.08, true); });
       ProgressBeam.on('done', function() { setDemoState('Complete', 'Everything arrived', 1, false); });
       ProgressBeam.on('cancel', function() { setDemoState('Ready', 'Waiting for an action', 0, false); });
+      ProgressBeam.on('pause', function(event) { setDemoState('Paused', 'Trickling is paused', event.progress || 0, false); });
+      ProgressBeam.on('resume', function(event) { setDemoState('Loading', 'Still working', event.progress || 0, false); });
 
       document.getElementById('b-0').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.start(); });
       document.getElementById('b-40').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.set(0.4); });
       document.getElementById('b-inc').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.inc(); });
       document.getElementById('b-100').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.done(); });
       document.getElementById('b-fail').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.start().set(0.58).fail(); });
+      document.getElementById('b-dec').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.dec(); });
+      document.getElementById('b-pause').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.pause(); });
+      document.getElementById('b-resume').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.resume(); });
+      document.getElementById('b-cancel').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.cancel(); });
+      document.getElementById('b-reset').addEventListener('click', function() { stopIntroDemo(); ProgressBeam.reset(); setDemoState('Ready', 'Waiting for an action', 0, false); });
 
       document.body.hidden = false;
       updateThemeButton();

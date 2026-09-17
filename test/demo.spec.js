@@ -54,3 +54,30 @@ test('demonstrates a failed request state', async ({ page }) => {
   await expect(page.locator('#demo-status')).toHaveText('Failed');
   await expect(page.locator('#stage-message')).toHaveText('The request needs another try');
 });
+
+test('drives decrement, pause, resume, cancel, and reset controls', async ({ page }) => {
+  await page.goto(demoUrl);
+  await page.evaluate(() => {
+    window.ProgressBeam.cancel();
+    window.ProgressBeam.configure({ speed: 0, trickle: false });
+  });
+
+  await page.locator('#b-0').click();
+  await page.locator('#b-40').click();
+  await page.locator('#b-dec').click();
+  await expect(page.locator('#progressbeam .bar')).toHaveAttribute('aria-valuenow', '38');
+
+  await page.locator('#b-pause').click();
+  await expect(page.locator('#demo-status')).toHaveText('Paused');
+  await expect(page.locator('#stage-message')).toHaveText('Trickling is paused');
+
+  await page.locator('#b-resume').click();
+  await expect(page.locator('#demo-status')).toHaveText('Loading');
+
+  await page.locator('#b-cancel').click();
+  await expect(page.locator('#demo-status')).toHaveText('Ready');
+
+  await page.locator('#b-reset').click();
+  await expect(page.locator('#demo-status')).toHaveText('Ready');
+  await expect(page.locator('#stage-message')).toHaveText('Waiting for an action');
+});
