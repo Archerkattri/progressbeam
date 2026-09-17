@@ -18,6 +18,10 @@ date-released: "2026-09-17"
 repository-code: "https://github.com/Archerkattri/progressbeam"
 url: "https://archerkattri.github.io/progressbeam/"
 license: MIT
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.22821135
+    description: "Concept DOI (all versions)"
 keywords:
   - "progress-bar"
   - "javascript"
