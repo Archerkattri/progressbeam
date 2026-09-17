@@ -269,7 +269,7 @@ entry for this release:
   author = {Attri, Krishi},
   title = {ProgressBeam},
   year = {2026},
-  version = {1.0.0},
+  version = {1.0.1},
   url = {https://github.com/Archerkattri/progressbeam}
 }
 ```

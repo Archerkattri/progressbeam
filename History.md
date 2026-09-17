@@ -1,17 +1,8 @@
-## [Unreleased]
+## [v1.0.1] - 2026-09-17
 
- * Add `dec()` for decreasing the active value and a `position` option with
-   bottom placement for the bar and spinner.
- * Harden the ESM entry with default and named exports over the single UMD
-   source, and ship zero-dependency framework adapters for fetch tracking,
-   router guards, React, Next.js App Router, and Vue.
- * Add size budgets, adapter checks, source-hygiene (CSP) tests, and CSP/SSR
-   documentation.
- * Add `reset()`, graduated `dec()` steps, `width` bar positioning with stale
-   transform cleanup, four-corner `spinnerPosition`, and a TanStack Router
-   adapter.
- * Ship ESM type declarations (`progressbeam.d.mts`) so ESM consumers no
-   longer resolve the CommonJS `export =` types.
+Patch release with no runtime changes: citation metadata (`CITATION.cff`,
+README BibTeX), Zenodo archiving support, and automated npm publishing
+through trusted publishing.
 
 ## [v1.0.0] - 2026-09-15
 
@@ -31,6 +22,18 @@ with a new package identity and modernized distribution and browser behavior.
    Playwright verification across Chromium, Firefox, and WebKit.
  * Remove obsolete Bower and Component manifests, modernize legacy integration
    examples, and fix delayed-start cleanup after `remove()`.
+ * Add `dec()` for decreasing the active value and a `position` option with
+   bottom placement for the bar and spinner.
+ * Harden the ESM entry with default and named exports over the single UMD
+   source, and ship zero-dependency framework adapters for fetch tracking,
+   router guards, React, Next.js App Router, and Vue.
+ * Add size budgets, adapter checks, source-hygiene (CSP) tests, and CSP/SSR
+   documentation.
+ * Add `reset()`, graduated `dec()` steps, `width` bar positioning with stale
+   transform cleanup, four-corner `spinnerPosition`, and a TanStack Router
+   adapter.
+ * Ship ESM type declarations (`progressbeam.d.mts`) so ESM consumers no
+   longer resolve the CommonJS `export =` types.
 
 ## [v0.2.0] - May 13, 2015
 

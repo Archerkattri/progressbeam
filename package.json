@@ -3,7 +3,7 @@
   "type": "commonjs",
   "author": "Krishi Attri <krishiattriwork@gmail.com>",
   "description": "Slim, accessible progress bar for browser applications",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Archerkattri/progressbeam.git"

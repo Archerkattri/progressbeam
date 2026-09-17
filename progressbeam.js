@@ -17,7 +17,7 @@
   var delayedStartPending = false;
   var eventHandlers = {};
 
-  ProgressBeam.version = '1.0.0';
+  ProgressBeam.version = '1.0.1';
 
   var Settings = ProgressBeam.settings = {
     minimum: 0.08,
