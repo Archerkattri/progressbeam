@@ -4,6 +4,20 @@
   "author": "Krishi Attri <krishiattriwork@gmail.com>",
   "description": "Slim, accessible progress bar for browser applications",
   "version": "1.0.1",
+  "keywords": [
+    "progress-bar",
+    "progress",
+    "nprogress",
+    "loading-bar",
+    "top-loader",
+    "accessibility",
+    "fetch",
+    "router",
+    "react",
+    "nextjs",
+    "vue",
+    "typescript"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Archerkattri/progressbeam.git"
