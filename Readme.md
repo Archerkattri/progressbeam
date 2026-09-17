@@ -252,6 +252,23 @@ by [Rico Sta. Cruz](https://github.com/rstacruz), built with help from
 The original MIT license and copyright notice are preserved in
 [License.md](License.md).
 
+## Citation
+
+If you use ProgressBeam in your work, please cite it. The easiest way is
+the **Cite this repository** button in the GitHub sidebar, which exports
+APA and BibTeX from [CITATION.cff](CITATION.cff). A ready-made BibTeX
+entry for this release:
+
+```bibtex
+@misc{Attri2026ProgressBeam,
+  author = {Attri, Krishi},
+  title = {ProgressBeam},
+  year = {2026},
+  version = {1.0.0},
+  url = {https://github.com/Archerkattri/progressbeam}
+}
+```
+
 ## License
 
 ProgressBeam is released under the [MIT License](License.md).

@@ -1,0 +1,13 @@
+{
+  "title": "ProgressBeam",
+  "description": "Slim, accessible, dependency-free progress indicator for browser applications.",
+  "creators": [
+    {
+      "name": "Attri, Krishi",
+      "orcid": "0009-0005-4695-6467"
+    }
+  ],
+  "license": "MIT",
+  "access_right": "open",
+  "keywords": ["progress-bar", "javascript", "typescript", "accessibility", "frontend"]
+}

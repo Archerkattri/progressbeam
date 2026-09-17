@@ -1,0 +1,52 @@
+# Release publishing via npm Trusted Publishing (OIDC) - no tokens stored.
+# The FIRST publish of a package name must be manual (npm login, then
+# npm publish --access public from the repo root); OIDC cannot create a
+# package that does not exist yet. Afterwards configure the trusted
+# publisher at npmjs.com -> package Settings -> Trusted publishing
+# (GitHub Actions, this repo + the publish.yml workflow), and every later
+# GitHub release publishes automatically with a provenance attestation.
+# Release checklist: bump package.json, refresh CITATION.cff
+# version/date-released, update History.md, tag vX.Y.Z, publish the
+# GitHub release.
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Verify tag matches package version
+        run: |
+          tag='${{ github.event.release.tag_name }}'
+          pkg="$(node -p "require('./package.json').version")"
+          test "v$pkg" = "$tag" || { echo "tag $tag does not match package v$pkg"; exit 1; }
+
+      - run: npm ci
+
+      - name: Fail if this version is already on npm
+        run: |
+          name="$(node -p "require('./package.json').name")"
+          ver="$(node -p "require('./package.json').version")"
+          if npm view "$name@$ver" version >/dev/null 2>&1; then
+            echo "$name@$ver is already published"; exit 1
+          fi
+
+      - run: npm publish --provenance --access public

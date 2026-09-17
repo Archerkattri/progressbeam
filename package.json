@@ -1,7 +1,7 @@
 {
   "name": "progressbeam",
   "type": "commonjs",
-  "author": "Archerkattri",
+  "author": "Krishi Attri <krishiattriwork@gmail.com>",
   "description": "Slim, accessible progress bar for browser applications",
   "version": "1.0.0",
   "repository": {

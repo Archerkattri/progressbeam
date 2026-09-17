@@ -1,0 +1,26 @@
+# Citation metadata. GitHub renders this as a "Cite this repository" button
+# with APA / BibTeX export. Keep version and date-released in step with
+# each release (see package.json and History.md).
+cff-version: 1.2.0
+message: "If you use ProgressBeam in your work, please cite it as below."
+type: software
+title: "ProgressBeam"
+abstract: "Slim, accessible, dependency-free progress indicator for browser applications."
+authors:
+  - family-names: "Attri"
+    given-names: "Krishi"
+    alias: "Archerkattri"
+    email: "krishiattriwork@gmail.com"
+    orcid: "https://orcid.org/0009-0005-4695-6467"
+    website: "https://github.com/Archerkattri"
+version: 1.0.0
+date-released: "2026-09-17"
+repository-code: "https://github.com/Archerkattri/progressbeam"
+url: "https://archerkattri.github.io/progressbeam/"
+license: MIT
+keywords:
+  - "progress-bar"
+  - "javascript"
+  - "typescript"
+  - "accessibility"
+  - "frontend"
