@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const childProcess = require('node:child_process');
+const spawn = require('cross-spawn');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -11,18 +11,12 @@ const npm = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 const env = Object.assign({}, process.env, { npm_config_cache: cache });
 
 function run(command, args, options) {
-  if (process.platform === 'win32' && /(?:npm|npx)\.cmd$/.test(command)) {
-    const quote = (value) => {
-      value = String(value);
-      return /[\s"&|<>^]/.test(value) ? '"' + value.replace(/"/g, '\\"') + '"' : value;
-    };
-    return childProcess.execFileSync(
-      process.env.ComSpec || 'cmd.exe',
-      ['/d', '/s', '/c', [command].concat(args).map(quote).join(' ')],
-      options
-    );
+  const result = spawn.sync(command, args, options);
+  if (result.error) throw result.error;
+  if (result.status !== 0) {
+    throw new Error(command + ' exited with status ' + result.status);
   }
-  return childProcess.execFileSync(command, args, options);
+  return result.stdout;
 }
 
 try {
