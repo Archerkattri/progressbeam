@@ -29,6 +29,7 @@ try {
     'MIGRATION.md',
     'Readme.md',
     'progressbeam.css',
+    'progressbeam.d.mts',
     'progressbeam.d.ts',
     'progressbeam.js',
     'progressbeam.mjs',

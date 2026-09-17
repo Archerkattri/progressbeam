@@ -8,5 +8,5 @@
     "moduleResolution": "Node16",
     "lib": ["ES2022", "DOM"]
   },
-  "files": ["types.test.ts"]
+  "files": ["types.test.ts", "types-esm.test.mts"]
 }

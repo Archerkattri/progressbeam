@@ -26,9 +26,14 @@
   ],
   "exports": {
     ".": {
-      "types": "./progressbeam.d.ts",
-      "import": "./progressbeam.mjs",
-      "require": "./progressbeam.js",
+      "import": {
+        "types": "./progressbeam.d.mts",
+        "default": "./progressbeam.mjs"
+      },
+      "require": {
+        "types": "./progressbeam.d.ts",
+        "default": "./progressbeam.js"
+      },
       "default": "./progressbeam.js"
     },
     "./progressbeam.css": "./progressbeam.css",
@@ -43,6 +48,7 @@
     "progressbeam.mjs",
     "progressbeam.css",
     "progressbeam.d.ts",
+    "progressbeam.d.mts",
     "adapters/",
     "docs/output-demo.gif",
     "docs/output-demo-dark.gif",
