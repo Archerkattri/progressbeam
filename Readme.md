@@ -1,5 +1,10 @@
 # ProgressBeam
 
+[![npm version](https://img.shields.io/npm/v/progressbeam.svg)](https://www.npmjs.com/package/progressbeam)
+[![CI](https://github.com/Archerkattri/progressbeam/actions/workflows/ci.yml/badge.svg)](https://github.com/Archerkattri/progressbeam/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](License.md)
+[![Website](https://img.shields.io/website.svg?url=https%3A%2F%2Farcherkattri.github.io%2Fprogressbeam%2F)](https://archerkattri.github.io/progressbeam/)
+
 ProgressBeam is a slim, dependency-free progress indicator for browser
 applications. Use it while a page loads, a route changes, or an asynchronous
 operation is in flight.
