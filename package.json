@@ -1,11 +1,12 @@
 {
   "name": "progressbeam",
+  "type": "commonjs",
   "author": "Archerkattri",
   "description": "Slim, accessible progress bar for browser applications",
   "version": "1.0.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Archerkattri/progressbeam.git"
+    "url": "git+https://github.com/Archerkattri/progressbeam.git"
   },
   "homepage": "https://archerkattri.github.io/progressbeam/",
   "scripts": {

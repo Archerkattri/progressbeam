@@ -10,6 +10,8 @@
  * Add `reset()`, graduated `dec()` steps, `width` bar positioning with stale
    transform cleanup, four-corner `spinnerPosition`, and a TanStack Router
    adapter.
+ * Ship ESM type declarations (`progressbeam.d.mts`) so ESM consumers no
+   longer resolve the CommonJS `export =` types.
 
 ## [v1.0.0] - 2026-09-15
 
