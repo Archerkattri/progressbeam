@@ -235,16 +235,11 @@ CSP notes:
 - `template` is assigned via `innerHTML`; treat it as trusted markup only.
 - No `<style>` elements are injected at runtime, so no nonce plumbing is needed.
 
-## How it compares
-
-- **NProgress 0.2.0** (unmaintained): ProgressBeam keeps its API and fixes the ARIA roles, adds ESM/TypeScript/SSR support, and ships the requested delay, indeterminate, RTL, pause, failure, and event features.
-- **topbar 3.x** (canvas-based, ~2 KB): smaller, but no types, no ESM, no accessibility semantics, no spinner, and no indeterminate, failure, or event support.
-- **@bprogress/core 1.x** (TypeScript): the closest rival. ProgressBeam adds valid ARIA with reduced-motion handling, lifecycle events, fail/cancel/reset, TanStack and fetch adapters, real-browser tests, size budgets, and provenance releases.
-
 ## Support and development
 
 The maintained browser target is current Chromium, Firefox, and WebKit. Node.js
-18 or newer is supported for package imports and SSR.
+18 or newer is the package runtime floor for imports and SSR. Use a currently
+supported Node.js release in production.
 
 See [MIGRATION.md](MIGRATION.md) for changes from ProgressBeam 0.2.0 and
 [CONTRIBUTING.md](CONTRIBUTING.md) for development and verification commands.

@@ -601,6 +601,18 @@
     });
 
     describe('failure and removal state machine', function() {
+      it('should stop trickling after a failure', function(done) {
+        ProgressBeam.configure({ trickle: true, trickleSpeed: 5 });
+        ProgressBeam.start().set(0.5).fail();
+        var failedStatus = ProgressBeam.status;
+
+        setTimeout(function() {
+          assert.equal(ProgressBeam.status, failedStatus);
+          assert.equal(ProgressBeam.failed, true);
+          done();
+        }, 30);
+      });
+
       it('fail() when idle without force should be a no-op', function() {
         var events = [];
         ProgressBeam.on('fail', function() { events.push('fail'); });

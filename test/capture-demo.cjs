@@ -14,7 +14,7 @@ const { chromium } = require('@playwright/test');
 // mapping — invisible in photos, but it shifts flat UI colors systematically.
 // Exact 24-bit cache keys keep the mapping correct and still fast.
 function nearestIndex(r, g, b, palette) {
-  // Starts at 1: slot 0 is the reserved transparent dummy.
+  // Starts at 1 because palette index 0 is reserved for transparency.
   let best = 1;
   let bestDist = Infinity;
   for (let i = 1; i < palette.length; i += 1) {
@@ -120,7 +120,7 @@ async function captureTheme(browser, theme, outFile) {
   console.log(`capture: ${theme} took ${frames.length} frames`);
 
   // One global palette sampled across states so colors stay stable. Slot 0
-  // is a reserved dummy that no real pixel may use: it is the transparent
+  // is reserved for transparency and no real pixel may use it:
   // index, and giving it a real color would repaint every pixel of that
   // color wherever anything changes.
   const samples = [frames[0].data, frames[Math.floor(frames.length / 2)].data,

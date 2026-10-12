@@ -521,6 +521,7 @@
   ProgressBeam.fail = function(force) {
     if (!ProgressBeam.status && !force) return this;
     if (!ProgressBeam.status && force) ProgressBeam.start();
+    cancelTrickleTimers();
     ProgressBeam.failed = true;
     if (typeof document === 'undefined') {
       emit('fail', { progress: ProgressBeam.status, status: ProgressBeam.status });
