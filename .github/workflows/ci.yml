@@ -76,10 +76,10 @@ jobs:
         run: npm run test:adapters
 
       - name: Lint package publishing setup
-        run: npx -y publint
+        run: npx --yes publint@0.3.25
 
       - name: Check TypeScript resolution
-        run: npx -y @arethetypeswrong/cli --pack .
+        run: npx --yes @arethetypeswrong/cli@0.18.5 --pack .
 
       - name: Audit production dependencies
         run: npm audit --audit-level=high

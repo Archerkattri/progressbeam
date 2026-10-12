@@ -23,7 +23,7 @@ jobs:
           package-manager-cache: false
 
       - name: Upgrade npm for trusted publishing
-        run: npm install -g npm@latest
+        run: npm install --global npm@12.2.0
 
       - name: Verify tag matches package version
         env:
@@ -48,8 +48,8 @@ jobs:
           npm run pack:check
           npm run test:size
           npm run test:adapters
-          npx -y publint
-          npx -y @arethetypeswrong/cli --pack .
+          npx --yes publint@0.3.25
+          npx --yes @arethetypeswrong/cli@0.18.5 --pack .
           npm audit --audit-level=high
 
       - name: Fail if this version is already on npm
