@@ -85,5 +85,9 @@
     "mocha": "^12.0.3",
     "pngjs": "^7.0.0",
     "typescript": "^7.0.2"
+  },
+  "overrides": {
+    "serialize-javascript": "7.1.2",
+    "source-map-js": "1.2.2"
   }
 }
