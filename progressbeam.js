@@ -176,10 +176,12 @@
     // SSR-safe: without a document only the status model advances.
     if (typeof document === 'undefined') return this;
 
-    var progress = ProgressBeam.render(!started),
-        bar      = progress.querySelector(Settings.barSelector),
-        speed    = Settings.speed,
-        ease     = Settings.easing;
+    var progress = ProgressBeam.render(!started);
+    if (!progress) return this;
+
+    var bar   = progress.querySelector(Settings.barSelector),
+        speed = Settings.speed,
+        ease  = Settings.easing;
 
     progress.offsetWidth; /* Force the transition to start from the new value. */
 
@@ -412,6 +414,16 @@
   ProgressBeam.render = function(fromStart) {
     if (typeof document === 'undefined') return null;
     if (ProgressBeam.isRendered()) return document.getElementById('progressbeam');
+    var parent = isDOM(Settings.parent) ? Settings.parent : null;
+    if (!parent) {
+      try {
+        parent = document.querySelector(Settings.parent);
+      } catch (error) {
+        parent = null;
+      }
+      parent = parent || document.body;
+    }
+    if (!parent) return null;
 
     addClass(document.documentElement, 'progressbeam-busy');
 
@@ -421,9 +433,6 @@
 
     var bar = progress.querySelector(Settings.barSelector),
         perc = fromStart ? (Settings.rtl ? '100' : '-100') : toBarPerc(ProgressBeam.status || 0),
-        parent = isDOM(Settings.parent)
-          ? Settings.parent
-          : document.querySelector(Settings.parent) || document.body,
         spinner
 
     if (bar) {

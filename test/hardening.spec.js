@@ -25,6 +25,42 @@ test('uses transform-based positioning in modern browsers (#222)', async ({ page
   expect(style).not.toContain('all ');
 });
 
+test('waits for a body before rendering when called from the document head', async ({ page }) => {
+  const result = await page.evaluate(() => {
+    document.body.remove();
+    let threw = false;
+    try {
+      window.ProgressBeam.set(0.5);
+    } catch (error) {
+      threw = true;
+    }
+
+    const deferred = !threw && !window.ProgressBeam.isRendered();
+    document.documentElement.appendChild(document.createElement('body'));
+    if (!threw) window.ProgressBeam.set(0.5);
+
+    return {
+      threw,
+      deferred,
+      rendered: window.ProgressBeam.isRendered()
+    };
+  });
+
+  expect(result.threw).toBe(false);
+  expect(result.deferred).toBe(true);
+  expect(result.rendered).toBe(true);
+});
+
+test('falls back to the document body for an invalid parent selector', async ({ page }) => {
+  await page.evaluate(() => {
+    window.ProgressBeam.configure({ parent: '#[' });
+    window.ProgressBeam.set(0.5);
+  });
+
+  await expect(page.locator('body > #progressbeam')).toHaveCount(1);
+  await expect(page.locator('body')).not.toHaveClass(/progressbeam-custom-parent/);
+});
+
 test('keeps the wrapper out of flex layout in custom parents (#223)', async ({ page }) => {
   await page.evaluate(() => {
     const parent = document.createElement('div');
