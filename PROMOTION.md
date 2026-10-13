@@ -11,17 +11,26 @@ on the noted dates or on a human voice.
 - GitHub topics: progress-bar, javascript, typescript, accessibility,
   frontend, nprogress, loading-bar
 - npm keywords for search discovery
+- GitHub Pages demo and dark/light runtime GIFs in the README
 - HelloGitHub submission: https://github.com/521xueweihan/HelloGitHub/issues/3719
 
-## awesome-a11y PR (eligible now)
+## Curated list contributions (eligible now)
 
-`brunopulis/awesome-a11y` (active, no AI-project waiting rule) takes
-community tools via PR. Read its `CONTRIBUTING.md`, then add to
-`topics/tools.md`:
+Submit separate, narrowly scoped PRs to both lists:
+
+- `sorrycc/awesome-javascript`, under **Loading Status**:
+
+  ```md
+  - [ProgressBeam](https://github.com/Archerkattri/progressbeam) - Slim, accessible browser progress bar with ESM, CommonJS, and framework adapters.
+  ```
+
+- `brunopulis/awesome-a11y`, under **Tools** in `topics/tools.md`:
 
 ```md
 - [ProgressBeam](https://github.com/Archerkattri/progressbeam) - Accessible, dependency-free progress bar with real progressbar semantics, reduced-motion support and framework adapters.
 ```
+
+Submissions are open: [awesome-javascript #1175](https://github.com/sorrycc/awesome-javascript/pull/1175) and [awesome-a11y #328](https://github.com/brunopulis/awesome-a11y/pull/328).
 
 ## awesome-vue PR (not a fit — skip)
 
