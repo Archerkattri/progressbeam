@@ -159,7 +159,7 @@ ProgressBeam.configure({
 | `indeterminate` | `false` | Uses an animated indeterminate bar. |
 | `rtl` | `false` | Renders progress from right to left. |
 | `position` | `'top'` | Bar placement: `'top'` or `'bottom'`. |
-| `spinnerPosition` | `'top-right'` | Spinner corner: top/bottom + left/right. |
+| `spinnerPosition` | `'top-right'` | Spinner placement: any corner or `'center'`. |
 | `positionUsing` | `''` (auto) | Bar animation: transform, margin, or width. |
 | `ariaLabel` | `'Loading'` | Accessible label for the progress bar. |
 | `parent` | `'body'` | CSS selector or DOM element receiving the indicator. |
