@@ -1,4 +1,4 @@
-## [Unreleased]
+## [v1.1.0] - 2026-10-12
 
  * Add `spinnerPosition: 'center'` for placing the spinner in the viewport center.
  * Defer rendering until `document.body` exists and fall back to the body when a configured parent selector is invalid.
