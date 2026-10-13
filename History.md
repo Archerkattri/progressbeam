@@ -1,3 +1,8 @@
+## [v1.1.0] - 2026-10-12
+
+ * Add `spinnerPosition: 'center'` for placing the spinner in the viewport center.
+ * Defer rendering until `document.body` exists and fall back to the body when a configured parent selector is invalid.
+
 ## [v1.0.2] - 2026-09-17
 
 Patch release with no runtime changes: npm search keywords for package

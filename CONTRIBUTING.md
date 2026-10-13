@@ -6,7 +6,7 @@ reviewed.
 
 ## Development
 
-Use Node.js 20.19 or newer, install dependencies with `npm ci`, and run:
+Use Node.js 22.14 or newer, install dependencies with `npm ci`, and run:
 
 ```text
 npm run test:browser

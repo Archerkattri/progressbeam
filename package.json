@@ -3,7 +3,7 @@
   "type": "commonjs",
   "author": "Krishi Attri <krishiattriwork@gmail.com>",
   "description": "Slim, accessible progress bar for browser applications",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "keywords": [
     "progress-bar",
     "progress",
@@ -77,10 +77,14 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.63.0",
+    "@playwright/test": "^1.64.0",
     "cross-spawn": "^7.0.6",
     "gifenc": "^1.0.3",
     "pngjs": "^7.0.0",
     "typescript": "^7.0.2"
+  },
+  "overrides": {
+    "serialize-javascript": "7.1.2",
+    "source-map-js": "1.2.2"
   }
 }

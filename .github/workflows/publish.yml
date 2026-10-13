@@ -1,13 +1,5 @@
-# Release publishing via npm Trusted Publishing (OIDC) - no tokens stored.
-# The FIRST publish of a package name must be manual (npm login, then
-# npm publish --access public from the repo root); OIDC cannot create a
-# package that does not exist yet. Afterwards configure the trusted
-# publisher at npmjs.com -> package Settings -> Trusted publishing
-# (GitHub Actions, this repo + the publish.yml workflow), and every later
-# GitHub release publishes automatically with a provenance attestation.
-# Release checklist: bump package.json, refresh CITATION.cff
-# version/date-released, update History.md, tag vX.Y.Z, publish the
-# GitHub release.
+# Publishes tagged GitHub releases through npm trusted publishing.
+# Configure the package's publisher for this repository and this workflow.
 name: Publish to npm
 
 on:
@@ -20,26 +12,44 @@ permissions:
 
 jobs:
   publish:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
-          cache: npm
+          package-manager-cache: false
 
       - name: Upgrade npm for trusted publishing
-        run: npm install -g npm@latest
+        run: npm install --global npm@12.2.0
 
       - name: Verify tag matches package version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
         run: |
-          tag='${{ github.event.release.tag_name }}'
           pkg="$(node -p "require('./package.json').version")"
-          test "v$pkg" = "$tag" || { echo "tag $tag does not match package v$pkg"; exit 1; }
+          test "v$pkg" = "$RELEASE_TAG" || { echo "tag $RELEASE_TAG does not match package v$pkg"; exit 1; }
 
       - run: npm ci
+
+      - name: Install browser test engines
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Run release checks
+        run: |
+          npm run test:browser
+          npm run test:package
+          npm run test:runtime
+          npm run test:packed
+          npm run typecheck
+          npm run pack:check
+          npm run test:size
+          npm run test:adapters
+          npx --yes publint@0.3.25
+          npx --yes @arethetypeswrong/cli@0.18.5 --pack .
+          npm audit --audit-level=high
 
       - name: Fail if this version is already on npm
         run: |

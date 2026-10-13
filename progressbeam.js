@@ -17,7 +17,7 @@
   var delayedStartPending = false;
   var eventHandlers = {};
 
-  ProgressBeam.version = '1.0.2';
+  ProgressBeam.version = '1.1.0';
 
   var Settings = ProgressBeam.settings = {
     minimum: 0.08,
@@ -91,12 +91,13 @@
       Settings.position = 'top';
     }
 
-    // The spinner pins to one viewport corner; anything else falls back to
-    // the legacy top-right placement.
+    // The spinner supports four corners and the viewport center; anything
+    // else falls back to the legacy top-right placement.
     if (Settings.spinnerPosition !== 'top-right' &&
         Settings.spinnerPosition !== 'top-left' &&
         Settings.spinnerPosition !== 'bottom-right' &&
-        Settings.spinnerPosition !== 'bottom-left') {
+        Settings.spinnerPosition !== 'bottom-left' &&
+        Settings.spinnerPosition !== 'center') {
       Settings.spinnerPosition = 'top-right';
     }
 
@@ -175,10 +176,12 @@
     // SSR-safe: without a document only the status model advances.
     if (typeof document === 'undefined') return this;
 
-    var progress = ProgressBeam.render(!started),
-        bar      = progress.querySelector(Settings.barSelector),
-        speed    = Settings.speed,
-        ease     = Settings.easing;
+    var progress = ProgressBeam.render(!started);
+    if (!progress) return this;
+
+    var bar   = progress.querySelector(Settings.barSelector),
+        speed = Settings.speed,
+        ease  = Settings.easing;
 
     progress.offsetWidth; /* Force the transition to start from the new value. */
 
@@ -411,6 +414,16 @@
   ProgressBeam.render = function(fromStart) {
     if (typeof document === 'undefined') return null;
     if (ProgressBeam.isRendered()) return document.getElementById('progressbeam');
+    var parent = isDOM(Settings.parent) ? Settings.parent : null;
+    if (!parent) {
+      try {
+        parent = document.querySelector(Settings.parent);
+      } catch (error) {
+        parent = null;
+      }
+      parent = parent || document.body;
+    }
+    if (!parent) return null;
 
     addClass(document.documentElement, 'progressbeam-busy');
 
@@ -420,9 +433,6 @@
 
     var bar = progress.querySelector(Settings.barSelector),
         perc = fromStart ? (Settings.rtl ? '100' : '-100') : toBarPerc(ProgressBeam.status || 0),
-        parent = isDOM(Settings.parent)
-          ? Settings.parent
-          : document.querySelector(Settings.parent) || document.body,
         spinner
 
     if (bar) {
@@ -521,6 +531,7 @@
   ProgressBeam.fail = function(force) {
     if (!ProgressBeam.status && !force) return this;
     if (!ProgressBeam.status && force) ProgressBeam.start();
+    cancelTrickleTimers();
     ProgressBeam.failed = true;
     if (typeof document === 'undefined') {
       emit('fail', { progress: ProgressBeam.status, status: ProgressBeam.status });
@@ -592,6 +603,7 @@
   }
 
   function spinnerClass(position) {
+    if (position === 'center') return 'progressbeam-spinner-center';
     if (position === 'top-left') return 'progressbeam-spinner-tl';
     if (position === 'bottom-right') return 'progressbeam-spinner-br';
     if (position === 'bottom-left') return 'progressbeam-spinner-bl';
@@ -664,6 +676,7 @@
     removeClass(progress, 'progressbeam-spinner-tl');
     removeClass(progress, 'progressbeam-spinner-br');
     removeClass(progress, 'progressbeam-spinner-bl');
+    removeClass(progress, 'progressbeam-spinner-center');
     addClass(progress, spinnerClass(Settings.spinnerPosition));
     if (ProgressBeam.failed) {
       addClass(progress, 'progressbeam-failed');

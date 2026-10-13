@@ -25,7 +25,13 @@ try {
     ['pack', '--json', '--pack-destination', tempRoot],
     { cwd: root, env, encoding: 'utf8' }
   );
-  const packResult = JSON.parse(packOutput)[0];
+  const packJson = JSON.parse(packOutput);
+  const packResult = Array.isArray(packJson)
+    ? packJson[0]
+    : packJson[Object.keys(packJson)[0]];
+  if (!packResult || typeof packResult.filename !== 'string') {
+    throw new Error('npm pack did not report a tarball filename');
+  }
   const tarball = path.join(tempRoot, packResult.filename);
   const consumer = path.join(tempRoot, 'consumer');
   fs.mkdirSync(consumer);
