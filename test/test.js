@@ -828,7 +828,7 @@
       });
 
       it('should fall back to top-right for unsupported values', function() {
-        ProgressBeam.configure({ spinnerPosition: 'center' });
+        ProgressBeam.configure({ spinnerPosition: 'middle' });
         assert.equal(ProgressBeam.settings.spinnerPosition, 'top-right');
       });
     });

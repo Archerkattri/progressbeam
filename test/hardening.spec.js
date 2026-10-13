@@ -100,6 +100,19 @@ test('pins the spinner to the configured corner', async ({ page }) => {
   await expect(page.locator('#progressbeam.progressbeam-spinner-bl .spinner')).toHaveCSS('left', '15px');
 });
 
+test('centers the spinner in the viewport', async ({ page }) => {
+  await page.evaluate(() => {
+    window.ProgressBeam.set(0.5);
+    window.ProgressBeam.configure({ spinnerPosition: 'center' });
+  });
+
+  const spinner = page.locator('#progressbeam.progressbeam-spinner-center .spinner');
+  const box = await spinner.boundingBox();
+  const viewport = page.viewportSize();
+  expect(Math.abs(box.x + box.width / 2 - viewport.width / 2)).toBeLessThan(1);
+  expect(Math.abs(box.y + box.height / 2 - viewport.height / 2)).toBeLessThan(1);
+});
+
 test('preserves spinner animation under a custom parent (#38)', async ({ page }) => {
   await page.evaluate(() => {
     const parent = document.createElement('div');

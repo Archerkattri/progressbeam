@@ -127,6 +127,14 @@
   left: 15px;
 }
 
+#progressbeam.progressbeam-spinner-center .spinner {
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
 #progressbeam.progressbeam-indeterminate .bar {
   -webkit-animation: progressbeam-indeterminate 1.5s infinite ease-in-out;
   animation: progressbeam-indeterminate 1.5s infinite ease-in-out;

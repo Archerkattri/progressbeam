@@ -14,7 +14,8 @@ ProgressBeam.configure({
   ariaLabel: 'Loading',
   height: '3px',
   zIndex: 2000,
-  position: 'bottom'
+  position: 'bottom',
+  spinnerPosition: 'center'
 });
 ProgressBeam.on('progress', (event) => { const current: number | null = event.progress; void current; });
 ProgressBeam.off('progress');

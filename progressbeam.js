@@ -91,12 +91,13 @@
       Settings.position = 'top';
     }
 
-    // The spinner pins to one viewport corner; anything else falls back to
-    // the legacy top-right placement.
+    // The spinner supports four corners and the viewport center; anything
+    // else falls back to the legacy top-right placement.
     if (Settings.spinnerPosition !== 'top-right' &&
         Settings.spinnerPosition !== 'top-left' &&
         Settings.spinnerPosition !== 'bottom-right' &&
-        Settings.spinnerPosition !== 'bottom-left') {
+        Settings.spinnerPosition !== 'bottom-left' &&
+        Settings.spinnerPosition !== 'center') {
       Settings.spinnerPosition = 'top-right';
     }
 
@@ -593,6 +594,7 @@
   }
 
   function spinnerClass(position) {
+    if (position === 'center') return 'progressbeam-spinner-center';
     if (position === 'top-left') return 'progressbeam-spinner-tl';
     if (position === 'bottom-right') return 'progressbeam-spinner-br';
     if (position === 'bottom-left') return 'progressbeam-spinner-bl';
@@ -665,6 +667,7 @@
     removeClass(progress, 'progressbeam-spinner-tl');
     removeClass(progress, 'progressbeam-spinner-br');
     removeClass(progress, 'progressbeam-spinner-bl');
+    removeClass(progress, 'progressbeam-spinner-center');
     addClass(progress, spinnerClass(Settings.spinnerPosition));
     if (ProgressBeam.failed) {
       addClass(progress, 'progressbeam-failed');
