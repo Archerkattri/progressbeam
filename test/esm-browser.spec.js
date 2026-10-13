@@ -1,6 +1,6 @@
 const { test, expect } = require('@playwright/test');
 
-const fixtureUrl = 'http://127.0.0.1:4173/test/esm-fixture.html';
+const fixtureUrl = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT || 4174}/test/esm-fixture.html`;
 
 test('native browser ESM entry exposes ProgressBeam', async ({ page }) => {
   await page.goto(fixtureUrl);

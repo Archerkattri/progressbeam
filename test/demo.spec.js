@@ -1,11 +1,12 @@
 const { test, expect } = require('@playwright/test');
 
-const demoUrl = 'http://127.0.0.1:4173/index.html';
+const demoOrigin = `http://127.0.0.1:${process.env.PLAYWRIGHT_PORT || 4174}`;
+const demoUrl = `${demoOrigin}/index.html`;
 
 test('vanilla demo loads without a framework runtime', async ({ page }) => {
   const externalRequests = [];
   page.on('request', (request) => {
-    if (request.url().startsWith('http') && !request.url().startsWith('http://127.0.0.1:4173/')) {
+    if (request.url().startsWith('http') && !request.url().startsWith(`${demoOrigin}/`)) {
       externalRequests.push(request.url());
     }
   });
