@@ -21,7 +21,13 @@ function runNpm(args) {
 }
 
 try {
-  const result = JSON.parse(runNpm(['pack', '--dry-run', '--json']))[0];
+  const packJson = JSON.parse(runNpm(['pack', '--dry-run', '--json']));
+  const result = Array.isArray(packJson)
+    ? packJson[0]
+    : packJson[Object.keys(packJson)[0]];
+  if (!result || !Array.isArray(result.files)) {
+    throw new Error('npm pack did not report its package file list');
+  }
   const actual = result.files.map((file) => file.path).sort();
   const expected = [
     'History.md',
