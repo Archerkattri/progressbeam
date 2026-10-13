@@ -83,3 +83,44 @@ jobs:
 
       - name: Audit production dependencies
         run: npm audit --audit-level=high
+
+  npm12-release-checks:
+    name: Release checks (Node 24, npm 12)
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+
+      - name: Install npm used by releases
+        run: npm install --global npm@12.2.0
+
+      - name: Verify npm version
+        run: test "$(npm --version)" = "12.2.0"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install browser test engines
+        run: npx playwright install --with-deps chromium firefox webkit
+
+      - name: Run release checks
+        run: |
+          npm test
+          npm run test:browser
+          npm run test:package
+          npm run test:runtime
+          npm run test:packed
+          npm run typecheck
+          npm run pack:check
+          npm run test:size
+          npm run test:adapters
+          npx --yes publint@0.3.25
+          npx --yes @arethetypeswrong/cli@0.18.5 --pack .
+          npm audit --audit-level=high
