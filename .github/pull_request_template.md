@@ -10,7 +10,6 @@
 
 ## Verification
 
-- [ ] `npm test`
 - [ ] `npm run test:browser`
 - [ ] `npm run typecheck`
 - [ ] `npm run pack:check`

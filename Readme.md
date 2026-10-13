@@ -1,7 +1,7 @@
 # ProgressBeam
 
 [![npm version](https://img.shields.io/npm/v/progressbeam.svg)](https://www.npmjs.com/package/progressbeam)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.22821135.svg)](https://doi.org/10.5281/zenodo.22821135)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23329689.svg)](https://doi.org/10.5281/zenodo.23329689)
 [![CI](https://github.com/Archerkattri/progressbeam/actions/workflows/ci.yml/badge.svg)](https://github.com/Archerkattri/progressbeam/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](License.md)
 
