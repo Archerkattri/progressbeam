@@ -30,6 +30,8 @@ Submit separate, narrowly scoped PRs to both lists:
 - [ProgressBeam](https://github.com/Archerkattri/progressbeam) - Accessible, dependency-free progress bar with real progressbar semantics, reduced-motion support and framework adapters.
 ```
 
+Submissions are open: [awesome-javascript #1175](https://github.com/sorrycc/awesome-javascript/pull/1175) and [awesome-a11y #328](https://github.com/brunopulis/awesome-a11y/pull/328).
+
 ## awesome-vue PR (not a fit — skip)
 
 Checked 2026-09-17: every section is Vue-specific components, directives,
