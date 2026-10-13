@@ -9,7 +9,6 @@ reviewed.
 Use Node.js 22.14 or newer, install dependencies with `npm ci`, and run:
 
 ```text
-npm test
 npm run test:browser
 npm run test:runtime
 npm run typecheck

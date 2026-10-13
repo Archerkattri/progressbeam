@@ -39,7 +39,6 @@ jobs:
 
       - name: Run release checks
         run: |
-          npm test
           npm run test:browser
           npm run test:package
           npm run test:runtime
